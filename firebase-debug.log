@@ -1,0 +1,395 @@
+[debug] [2018-02-19T08:40:25.735Z] ----------------------------------------------------------------------
+[debug] [2018-02-19T08:40:25.744Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\orlanth23\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase deploy --only functions --debug
+[debug] [2018-02-19T08:40:25.744Z] CLI Version:   3.17.4
+[debug] [2018-02-19T08:40:25.745Z] Platform:      win32
+[debug] [2018-02-19T08:40:25.746Z] Node Version:  v9.4.0
+[debug] [2018-02-19T08:40:25.748Z] Time:          Mon Feb 19 2018 19:40:25 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:25.748Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-02-19T08:40:25.769Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-02-19T08:40:25.769Z] > authorizing via signed-in user
+[debug] [2018-02-19T08:40:25.775Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/oliweb-ec245  
+  
+ Mon Feb 19 2018 19:40:25 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:26.961Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:26.964Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/oliweb-ec245/tokens  
+  
+ Mon Feb 19 2018 19:40:26 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:27.881Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Deploying to 'oliweb-ec245'...
+[info] 
+[info] i  deploying functions
+[info] Running command: npm --prefix %RESOURCE_DIR% run lint
+[info] Running command: npm --prefix %RESOURCE_DIR% run build
+[info] +  functions: Finished running predeploy script.
+[debug] [2018-02-19T08:40:37.105Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "lint": "./node_modules/.bin/tslint -p tslint.json",
+    "build": "./node_modules/.bin/tsc",
+    "serve": "npm run build && firebase serve --only functions",
+    "shell": "npm run build && firebase experimental:functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "lodash": "^4.17.5",
+    "request-promise": "^4.2.2",
+    "firebase-admin": "~5.8.1",
+    "firebase-functions": "^0.8.1"
+  },
+  "devDependencies": {
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3"
+  },
+  "private": true
+}
+[info] i  functions: ensuring necessary APIs are enabled...
+[debug] [2018-02-19T08:40:37.124Z] >>> HTTP REQUEST GET https://servicemanagement.googleapis.com/v1/services/cloudfunctions.googleapis.com/projectSettings/oliweb-ec245?view=CONSUMER_VIEW  
+  
+ Mon Feb 19 2018 19:40:37 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:37.130Z] >>> HTTP REQUEST GET https://servicemanagement.googleapis.com/v1/services/runtimeconfig.googleapis.com/projectSettings/oliweb-ec245?view=CONSUMER_VIEW  
+  
+ Mon Feb 19 2018 19:40:37 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:38.853Z] <<< HTTP RESPONSE 200
+[info] +  functions: all necessary APIs are enabled
+[debug] [2018-02-19T08:40:38.969Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:38.973Z] >>> HTTP REQUEST GET https://appengine.googleapis.com/v1/apps/oliweb-ec245  
+  
+ Mon Feb 19 2018 19:40:38 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:38.976Z] >>> HTTP REQUEST GET https://apikeys.googleapis.com/v1/projects/oliweb-ec245/apiKeys  
+  
+ Mon Feb 19 2018 19:40:38 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:40.382Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:40.497Z] <<< HTTP RESPONSE 200
+[info] i  functions: preparing functions directory for uploading...
+[debug] [2018-02-19T08:40:40.501Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs  
+  
+ Mon Feb 19 2018 19:40:40 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:41.157Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:41.159Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables  
+  
+ Mon Feb 19 2018 19:40:41 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:41.659Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:41.661Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables/password  
+  
+ Mon Feb 19 2018 19:40:41 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:41.665Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables/url  
+  
+ Mon Feb 19 2018 19:40:41 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:41.668Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables/username  
+  
+ Mon Feb 19 2018 19:40:41 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:42.186Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:42.197Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:42.201Z] <<< HTTP RESPONSE 200
+[info] i  functions: packaged functions (35.52 KB) for uploading
+[debug] [2018-02-19T08:40:42.945Z] >>> HTTP REQUEST GET https://www.googleapis.com/storage/v1/b/staging.oliweb-ec245.appspot.com  
+  
+ Mon Feb 19 2018 19:40:42 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:43.916Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:43.919Z] >>> HTTP REQUEST POST https://www.googleapis.com/upload/storage/v1/b/staging.oliweb-ec245.appspot.com/o?uploadType=media&name=firebase-functions-source  
+ ReadStream {
+  _readableState: 
+   ReadableState {
+     objectMode: false,
+     highWaterMark: 65536,
+     buffer: BufferList { head: [Object], tail: [Object], length: 1 },
+     length: 36369,
+     pipes: null,
+     pipesCount: 0,
+     flowing: null,
+     ended: true,
+     endEmitted: false,
+     reading: false,
+     sync: false,
+     needReadable: false,
+     emittedReadable: true,
+     readableListening: false,
+     resumeScheduled: false,
+     destroyed: false,
+     defaultEncoding: 'utf8',
+     awaitDrain: 0,
+     readingMore: false,
+     decoder: null,
+     encoding: null },
+  readable: true,
+  domain: null,
+  _events: { end: [Function] },
+  _eventsCount: 1,
+  _maxListeners: undefined,
+  path: 'C:\\Users\\ORLANT~1\\AppData\\Local\\Temp\\firebase-functions-3188GkiLyJAbfEbQ.zip',
+  fd: 5,
+  flags: 'r',
+  mode: 438,
+  start: undefined,
+  end: undefined,
+  autoClose: true,
+  pos: undefined,
+  bytesRead: 36369,
+  closed: false } 
+ Mon Feb 19 2018 19:40:43 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:45.269Z] <<< HTTP RESPONSE 200
+[info] +  functions: functions folder uploaded successfully
+[debug] [2018-02-19T08:40:45.275Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/projects/oliweb-ec245/locations/us-central1/functions  
+  
+ Mon Feb 19 2018 19:40:45 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:45.946Z] <<< HTTP RESPONSE 200
+[info] i  functions: updating function indexAnnonceToElastic...
+[debug] [2018-02-19T08:40:45.953Z] Trigger is:  {"eventTrigger":{"resource":"projects/_/instances/oliweb-ec245/refs/annonces/{annonceId}/annonceEntity","eventType":"providers/google.firebase.database/eventTypes/ref.write"}}
+[debug] [2018-02-19T08:40:45.956Z] >>> HTTP REQUEST PATCH https://cloudfunctions.googleapis.com/v1/projects/oliweb-ec245/locations/us-central1/functions/indexAnnonceToElastic 
+query params: {"updateMask":"sourceArchiveUrl,name,labels,eventTrigger.resource,eventTrigger.eventType"} 
+ { sourceArchiveUrl: 'gs://staging.oliweb-ec245.appspot.com/firebase-functions-source',
+  name: 'projects/oliweb-ec245/locations/us-central1/functions/indexAnnonceToElastic',
+  labels: { 'deployment-tool': 'cli-firebase' },
+  eventTrigger: 
+   { resource: 'projects/_/instances/oliweb-ec245/refs/annonces/{annonceId}/annonceEntity',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.write' } } 
+ Mon Feb 19 2018 19:40:45 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:46.524Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:46.529Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9rYjFyejJ6ZUVHUQ  
+  
+ Mon Feb 19 2018 19:40:46 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:47.017Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:49.021Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9rYjFyejJ6ZUVHUQ  
+  
+ Mon Feb 19 2018 19:40:49 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:49.513Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:51.517Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9rYjFyejJ6ZUVHUQ  
+  
+ Mon Feb 19 2018 19:40:51 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:51.992Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:53.995Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9rYjFyejJ6ZUVHUQ  
+  
+ Mon Feb 19 2018 19:40:53 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:54.502Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:56.505Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9rYjFyejJ6ZUVHUQ  
+  
+ Mon Feb 19 2018 19:40:56 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:56.994Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:40:58.998Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9rYjFyejJ6ZUVHUQ  
+  
+ Mon Feb 19 2018 19:40:58 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:40:59.479Z] <<< HTTP RESPONSE 200
+[warn] !  functions[indexAnnonceToElastic]: Deployment error.
+[info] Function load error: Code in file lib/index.js can't be loaded.
+Did you list all required modules in the package.json dependencies?
+Detailed stack trace: Error: Cannot find module 'request'
+    at Function.Module._resolveFilename (module.js:469:15)
+    at Function.Module._load (module.js:417:25)
+    at Module.require (module.js:497:17)
+    at require (internal/module.js:20:19)
+    at /user_code/node_modules/request-promise/lib/rp.js:11:16
+    at module.exports (/user_code/node_modules/request-promise/node_modules/stealthy-require/lib/index.js:62:23)
+    at Object.<anonymous> (/user_code/node_modules/request-promise/lib/rp.js:10:19)
+    at Module._compile (module.js:570:32)
+    at Object.Module._extensions..js (module.js:579:10)
+    at Module.load (module.js:487:32)
+    at tryModuleLoad (module.js:446:12)
+    at Function.Module._load (module.js:438:3)
+    at Module.require (module.js:497:17)
+    at require (internal/module.js:20:19)
+    at Object.<anonymous> (/user_code/lib/index.js:5:17)
+    at Module._compile (module.js:570:32)
+    at Object.Module._extensions..js (module.js:579:10)
+    at Module.load (module.js:487:32)
+    at tryModuleLoad (module.js:446:12)
+    at Function.Module._load (module.js:438:3)
+    at Module.require (module.js:497:17)
+    at require (internal/module.js:20:19)
+[info] 
+
+Functions deploy had errors. To continue deploying other features (such as database), run:
+[info]     firebase deploy --except functions
+[error] 
+[error] Error: Functions did not deploy properly.
+[debug] [2018-02-19T08:43:32.478Z] ----------------------------------------------------------------------
+[debug] [2018-02-19T08:43:32.485Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\orlanth23\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase deploy --only functions --debug
+[debug] [2018-02-19T08:43:32.487Z] CLI Version:   3.17.4
+[debug] [2018-02-19T08:43:32.489Z] Platform:      win32
+[debug] [2018-02-19T08:43:32.491Z] Node Version:  v9.4.0
+[debug] [2018-02-19T08:43:32.491Z] Time:          Mon Feb 19 2018 19:43:32 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:43:32.493Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-02-19T08:43:32.515Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-02-19T08:43:32.516Z] > authorizing via signed-in user
+[debug] [2018-02-19T08:43:32.521Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/oliweb-ec245  
+  
+ Mon Feb 19 2018 19:43:32 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:43:40.121Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:43:40.123Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/oliweb-ec245/tokens  
+  
+ Mon Feb 19 2018 19:43:40 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:43:45.957Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Deploying to 'oliweb-ec245'...
+[info] 
+[info] i  deploying functions
+[info] Running command: npm --prefix %RESOURCE_DIR% run lint
+[info] Running command: npm --prefix %RESOURCE_DIR% run build
+[info] +  functions: Finished running predeploy script.
+[debug] [2018-02-19T08:43:57.208Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "lint": "./node_modules/.bin/tslint -p tslint.json",
+    "build": "./node_modules/.bin/tsc",
+    "serve": "npm run build && firebase serve --only functions",
+    "shell": "npm run build && firebase experimental:functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "request": "^2.83.0",
+    "require": "^2.4.20",
+    "lodash": "^4.17.5",
+    "request-promise": "^4.2.2",
+    "firebase-admin": "~5.8.1",
+    "firebase-functions": "^0.8.1"
+  },
+  "devDependencies": {
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3"
+  },
+  "private": true
+}
+[info] i  functions: ensuring necessary APIs are enabled...
+[debug] [2018-02-19T08:43:57.217Z] >>> HTTP REQUEST GET https://servicemanagement.googleapis.com/v1/services/cloudfunctions.googleapis.com/projectSettings/oliweb-ec245?view=CONSUMER_VIEW  
+  
+ Mon Feb 19 2018 19:43:57 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:43:57.219Z] >>> HTTP REQUEST GET https://servicemanagement.googleapis.com/v1/services/runtimeconfig.googleapis.com/projectSettings/oliweb-ec245?view=CONSUMER_VIEW  
+  
+ Mon Feb 19 2018 19:43:57 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:43:59.120Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:43:59.167Z] <<< HTTP RESPONSE 200
+[info] +  functions: all necessary APIs are enabled
+[debug] [2018-02-19T08:43:59.172Z] >>> HTTP REQUEST GET https://appengine.googleapis.com/v1/apps/oliweb-ec245  
+  
+ Mon Feb 19 2018 19:43:59 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:43:59.173Z] >>> HTTP REQUEST GET https://apikeys.googleapis.com/v1/projects/oliweb-ec245/apiKeys  
+  
+ Mon Feb 19 2018 19:43:59 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:00.797Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:00.812Z] <<< HTTP RESPONSE 200
+[info] i  functions: preparing functions directory for uploading...
+[debug] [2018-02-19T08:44:00.820Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs  
+  
+ Mon Feb 19 2018 19:44:00 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:01.658Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:01.661Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables  
+  
+ Mon Feb 19 2018 19:44:01 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:02.142Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:02.145Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables/password  
+  
+ Mon Feb 19 2018 19:44:02 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:02.146Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables/url  
+  
+ Mon Feb 19 2018 19:44:02 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:02.148Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/oliweb-ec245/configs/elasticsearch/variables/username  
+  
+ Mon Feb 19 2018 19:44:02 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:02.764Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:02.996Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:03.004Z] <<< HTTP RESPONSE 200
+[info] i  functions: packaged functions (35.54 KB) for uploading
+[debug] [2018-02-19T08:44:04.190Z] >>> HTTP REQUEST GET https://www.googleapis.com/storage/v1/b/staging.oliweb-ec245.appspot.com  
+  
+ Mon Feb 19 2018 19:44:04 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:04.977Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:04.979Z] >>> HTTP REQUEST POST https://www.googleapis.com/upload/storage/v1/b/staging.oliweb-ec245.appspot.com/o?uploadType=media&name=firebase-functions-source  
+ ReadStream {
+  _readableState: 
+   ReadableState {
+     objectMode: false,
+     highWaterMark: 65536,
+     buffer: BufferList { head: [Object], tail: [Object], length: 1 },
+     length: 36389,
+     pipes: null,
+     pipesCount: 0,
+     flowing: null,
+     ended: true,
+     endEmitted: false,
+     reading: false,
+     sync: false,
+     needReadable: false,
+     emittedReadable: true,
+     readableListening: false,
+     resumeScheduled: false,
+     destroyed: false,
+     defaultEncoding: 'utf8',
+     awaitDrain: 0,
+     readingMore: false,
+     decoder: null,
+     encoding: null },
+  readable: true,
+  domain: null,
+  _events: { end: [Function] },
+  _eventsCount: 1,
+  _maxListeners: undefined,
+  path: 'C:\\Users\\ORLANT~1\\AppData\\Local\\Temp\\firebase-functions-9264rhHbQLDk0eb0.zip',
+  fd: 5,
+  flags: 'r',
+  mode: 438,
+  start: undefined,
+  end: undefined,
+  autoClose: true,
+  pos: undefined,
+  bytesRead: 36389,
+  closed: false } 
+ Mon Feb 19 2018 19:44:04 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:06.196Z] <<< HTTP RESPONSE 200
+[info] +  functions: functions folder uploaded successfully
+[debug] [2018-02-19T08:44:06.202Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/projects/oliweb-ec245/locations/us-central1/functions  
+  
+ Mon Feb 19 2018 19:44:06 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:07.061Z] <<< HTTP RESPONSE 200
+[info] i  functions: updating function indexAnnonceToElastic...
+[debug] [2018-02-19T08:44:07.068Z] Trigger is:  {"eventTrigger":{"resource":"projects/_/instances/oliweb-ec245/refs/annonces/{annonceId}/annonceEntity","eventType":"providers/google.firebase.database/eventTypes/ref.write"}}
+[debug] [2018-02-19T08:44:07.071Z] >>> HTTP REQUEST PATCH https://cloudfunctions.googleapis.com/v1/projects/oliweb-ec245/locations/us-central1/functions/indexAnnonceToElastic 
+query params: {"updateMask":"sourceArchiveUrl,name,labels,eventTrigger.resource,eventTrigger.eventType"} 
+ { sourceArchiveUrl: 'gs://staging.oliweb-ec245.appspot.com/firebase-functions-source',
+  name: 'projects/oliweb-ec245/locations/us-central1/functions/indexAnnonceToElastic',
+  labels: { 'deployment-tool': 'cli-firebase' },
+  eventTrigger: 
+   { resource: 'projects/_/instances/oliweb-ec245/refs/annonces/{annonceId}/annonceEntity',
+     eventType: 'providers/google.firebase.database/eventTypes/ref.write' } } 
+ Mon Feb 19 2018 19:44:07 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:07.625Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:07.630Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:07 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:08.115Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:10.117Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:10 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:10.594Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:12.597Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:12 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:13.078Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:15.082Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:15 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:15.558Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:17.561Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:17 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:18.038Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:20.041Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:20 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:20.528Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-19T08:44:22.530Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/operations/b2xpd2ViLWVjMjQ1L3VzLWNlbnRyYWwxL2luZGV4QW5ub25jZVRvRWxhc3RpYy9qSHl3bXFWVXdlaw  
+  
+ Mon Feb 19 2018 19:44:22 GMT+1100 (Pacifique Centre)
+[debug] [2018-02-19T08:44:23.039Z] <<< HTTP RESPONSE 200
+[info] +  functions[indexAnnonceToElastic]: Successful update operation. 
+[info] 
+[info] +  Deploy complete!
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/oliweb-ec245/overview

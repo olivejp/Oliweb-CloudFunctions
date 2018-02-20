@@ -11,6 +11,10 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "request": "^2.83.0",
+    "require": "^2.4.20",
+    "lodash": "^4.17.5",
+    "request-promise": "^4.2.2",
     "firebase-admin": "~5.8.1",
     "firebase-functions": "^0.8.1"
   },

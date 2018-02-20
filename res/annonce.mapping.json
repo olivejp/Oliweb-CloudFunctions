@@ -1,0 +1,46 @@
+{
+  "mappings": {
+    "annonce": {
+      "properties": {
+        "uuid": {
+          "type": "text"
+        },
+        "titre": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "prix": {
+          "type": "long"
+        },
+        "idCategorie": {
+          "type": "long"
+        },
+        "datePublication": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "photos": {
+          "properties": {
+            "firebasePath": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    }
+  }
+}

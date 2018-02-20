@@ -1,0 +1,64 @@
+{
+  "took": 8,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 4,
+    "max_score": 2.0794415,
+    "hits": [
+      {
+        "_index": "annonces",
+        "_type": "annonce",
+        "_id": "fa408bef-461a-4cb5-84ce-686cdaf6a012",
+        "_score": 2.0794415,
+        "_source": {
+          "uuid": "fa408bef-461a-4cb5-84ce-686cdaf6a012",
+          "titre": "Bonjour ",
+          "description": "Bonjour Ã  vous de voir que les deux. Je suis une jeune femme de chambre et une bonne soirÃ©e. ",
+          "prix": 1200
+        }
+      },
+      {
+        "_index": "annonces",
+        "_type": "annonce",
+        "_id": "e3d64cc3-8cd0-436a-8092-83f2baf970c3",
+        "_score": 2.0794415,
+        "_source": {
+          "uuid": "e3d64cc3-8cd0-436a-8092-83f2baf970c3",
+          "titre": "Bonjour Monsieur",
+          "description": "Bonjour Monsieur, je suis un petit mssage de soutien scolaire ",
+          "prix": 3580
+        }
+      },
+      {
+        "_index": "annonces",
+        "_type": "annonce",
+        "_id": "7d87c2eb-92ae-4f8f-b3ca-54984d0ce07f",
+        "_score": 0.8630463,
+        "_source": {
+          "uuid": "7d87c2eb-92ae-4f8f-b3ca-54984d0ce07f",
+          "titre": "Bonjour ",
+          "description": "Encore un bonjour",
+          "prix": 123456789
+        }
+      },
+      {
+        "_index": "annonces",
+        "_type": "annonce",
+        "_id": "0bc1bc86-4460-4c49-9afd-ab0e828af3ea",
+        "_score": 0.2876821,
+        "_source": {
+          "uuid": "0bc1bc86-4460-4c49-9afd-ab0e828af3ea",
+          "titre": "Planche wake board updated",
+          "description": "Bonjour je vend une planche.",
+          "prix": 40000
+        }
+      }
+    ]
+  }
+}
