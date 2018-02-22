@@ -26,8 +26,34 @@
         "prix": {
           "type": "long"
         },
-        "idCategorie": {
-          "type": "long"
+        "utilisateur": {
+          "properties": {
+            "email": {
+              "type": "text"
+            },
+            "uuid": {
+              "type": "text"
+            },
+            "telephone": {
+              "type": "text"
+            }
+          }
+        },
+        "categorie": {
+          "properties": {
+            "id": {
+              "type": "long"
+            },
+            "libelle": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
         },
         "datePublication": {
           "type": "date",
