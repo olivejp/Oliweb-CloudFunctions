@@ -53,7 +53,7 @@ exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
         const perPage = requestData.perPage;
         const search_query = requestData.searchQuery;
         // Lancement de la recherche
-        client.search({
+        return client.search({
             index: 'annonces',
             type: 'annonce',
             from: (pageNum - 1) * perPage,
@@ -69,7 +69,7 @@ exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
         }).then(resp => {
             // Récupération du résultat et écriture dans notre FirebaseDatabase
             const hits = resp.hits.hits;
-            return event.data.child('results').ref.set(hits, a => {
+            event.data.child('results').ref.set(hits, a => {
                 console.log('Insertion dans results échouée : ' + a.message);
             });
         }, reason => console.log(reason.message));
