@@ -19,7 +19,7 @@
           "fields": {
             "keyword": {
               "type": "keyword",
-              "ignore_above": 256
+              "ignore_above": 1024
             }
           }
         },
@@ -56,8 +56,7 @@
           }
         },
         "datePublication": {
-          "type": "date",
-          "format": "strict_date_optional_time||epoch_millis"
+          "type": "long"
         },
         "photos": {
           "properties": {
