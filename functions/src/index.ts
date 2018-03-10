@@ -42,63 +42,49 @@ exports.indexAnnonceToElastic = fbfunctions.database.ref('/annonces/{annonceId}/
 exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
     .onWrite(event => {
 
-        // Récupération de la requête et de son Id
-        const requestData = event.data.val();
-        const requestId = event.params.requestId;
+            // Récupération de la requête et de son Id
+            const requestData = event.data.val();
+            const requestId = event.params.requestId;
 
-        console.log('Request ', requestId, requestData);
+            console.log('Request ', requestId, requestData);
 
-        // We want avoid infinite loop, so we continue only if requestData !== null && results has not been set already.
-        if (requestData && isUndefined(requestData.results)) {
+            // We want avoid infinite loop, so we continue only if requestData !== null && results has not been set already.
+            if (requestData && isUndefined(requestData.results) && isUndefined(requestData.no_results)) {
 
-            const elasticSearchConfig = fbfunctions.config().elasticsearch;
+                const elasticSearchConfig = fbfunctions.config().elasticsearch;
 
-            // Récupération des paramètres de notre recherche
-            const pageNum = requestData.page;
-            const perPage = requestData.perPage;
-            const search_query = requestData.searchQuery;
+                // Lancement de la recherche
+                const elasticSearchUrl = elasticSearchConfig.url + 'annonces/_search';
 
-            console.log(pageNum, perPage, search_query);
+                const elasticsearchRequest = {
+                    method: 'POST',
+                    uri: elasticSearchUrl,
+                    auth: {
+                        username: elasticSearchConfig.username,
+                        password: elasticSearchConfig.password,
+                    },
+                    body: requestData,
+                    json: true
+                };
 
-            // Lancement de la recherche
-            const elasticSearchUrl = elasticSearchConfig.url + 'annonces/_search';
-            const elasticsearchRequest = {
-                method: 'POST',
-                uri: elasticSearchUrl,
-                auth: {
-                    username: elasticSearchConfig.username,
-                    password: elasticSearchConfig.password,
-                },
-                body: {
-                    from: (pageNum - 1) * perPage,
-                    size: perPage,
-                    query: {
-                        multi_match: {
-                            query: search_query,
-                            fields: ['titre', 'description']
-                        }
+                return request(elasticsearchRequest).then(resp => {
+                    // Récupération du résultat et écriture dans notre FirebaseDatabase
+                    const hits = resp.hits.hits;
+                    console.log("Response", resp);
+
+                    if (resp.hits.total > 0) {
+                        event.data.ref.child('results').set(hits)
+                            .then(value => console.log('Insertion réussie'))
+                            .catch(a => console.log('Insertion dans results échouée : ' + a.message));
+                    } else {
+                        event.data.ref.child('no_results').set(true)
+                            .then(value => console.log('Insertion réussie : aucun élément trouvé'))
+                            .catch(a => console.log('Insertion dans results échouée : ' + a.message));
                     }
-                },
-                json: true
-            };
 
-            return request(elasticsearchRequest).then(resp => {
-                // Récupération du résultat et écriture dans notre FirebaseDatabase
-                const hits = resp.hits.hits;
-                console.log("Response", resp);
-
-                if (hits !== null) {
-                    event.data.ref.child('results').set(hits)
-                        .then(value => console.log('Insertion réussie'))
-                        .catch(a => console.log('Insertion dans results échouée : ' + a.message));
-                } else {
-                    event.data.ref.child('no_results').set(true)
-                        .then(value => console.log('Insertion réussie : aucun élément trouvé'))
-                        .catch(a => console.log('Insertion dans results échouée : ' + a.message));
-                }
-
-            }).catch(reason => console.log('Houla ca va pas du tout la !' + reason.message));
-        } else {
-            return true;
+                }).catch(reason => console.log('Houla ca va pas du tout la !' + reason.message));
+            } else {
+                return true;
+            }
         }
-    });
+    );

@@ -39,13 +39,8 @@ exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
     const requestId = event.params.requestId;
     console.log('Request ', requestId, requestData);
     // We want avoid infinite loop, so we continue only if requestData !== null && results has not been set already.
-    if (requestData && util_1.isUndefined(requestData.results)) {
+    if (requestData && util_1.isUndefined(requestData.results) && util_1.isUndefined(requestData.no_results)) {
         const elasticSearchConfig = fbfunctions.config().elasticsearch;
-        // Récupération des paramètres de notre recherche
-        const pageNum = requestData.page;
-        const perPage = requestData.perPage;
-        const search_query = requestData.searchQuery;
-        console.log(pageNum, perPage, search_query);
         // Lancement de la recherche
         const elasticSearchUrl = elasticSearchConfig.url + 'annonces/_search';
         const elasticsearchRequest = {
@@ -55,23 +50,14 @@ exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
                 username: elasticSearchConfig.username,
                 password: elasticSearchConfig.password,
             },
-            body: {
-                from: (pageNum - 1) * perPage,
-                size: perPage,
-                query: {
-                    multi_match: {
-                        query: search_query,
-                        fields: ['titre', 'description']
-                    }
-                }
-            },
+            body: requestData,
             json: true
         };
         return request(elasticsearchRequest).then(resp => {
             // Récupération du résultat et écriture dans notre FirebaseDatabase
             const hits = resp.hits.hits;
             console.log("Response", resp);
-            if (hits !== null) {
+            if (resp.hits.total > 0) {
                 event.data.ref.child('results').set(hits)
                     .then(value => console.log('Insertion réussie'))
                     .catch(a => console.log('Insertion dans results échouée : ' + a.message));
