@@ -30,6 +30,24 @@ function getServerTimestamp(): Promise<number> {
     });
 }
 
+function indexation(annonce: any): Promise<any> {
+    const annonceId = annonce.uuid;
+
+    console.log('Indexing annonce ', annonceId, annonce);
+    const elasticsearchRequest = {
+        method: 'POST',
+        uri: elasticSearchConfig.url + 'annonces/annonce/' + annonceId,
+        auth: {
+            username: elasticSearchConfig.username,
+            password: elasticSearchConfig.password,
+        },
+        body: annonce,
+        json: true
+    };
+
+    return request(elasticsearchRequest);
+}
+
 // Function d'indexation des annonces
 exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
     .onWrite((data, context) => {
@@ -60,6 +78,48 @@ exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
             })
             .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
     });
+
+// TODO finir cette Cloud Function
+// Cloud function qui permettra de supprimer l'index annonces sur ES
+// Relire toutes la DB sur Firebase Database et réindexer toutes les annonces
+exports.reindexElasticsearch = functions.https.onRequest((req, res) => {
+
+    const deleteAnnoncesIndex = {
+        method: 'DELETE',
+        uri: elasticSearchConfig.url + 'annonces',
+        auth: {
+            username: elasticSearchConfig.username,
+            password: elasticSearchConfig.password,
+        }
+    };
+
+    return request(deleteAnnoncesIndex)
+        .then(response => {
+            console.log('Suppression de l\'index annonces réussi', response);
+
+            db.ref('/annonces').once('value', listAnnonces => {
+                console.log('Liste des annonces à réindexer : ' + listAnnonces.val());
+
+                if (listAnnonces.forEach(annonce => {
+                    indexation(annonce)
+                        .then(response => console.log('Elasticsearch response', response))
+                        .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message))
+                    return true;
+                })) {
+                    console.log('Tout s\'est bien passé');
+                    res.status(200).send('OK');
+                } else {
+                    console.log('Y a eu un soucis avec la boucle de mise à jour');
+                    res.status(303).send('FOR LOOP FAIL');
+                }
+
+
+            }).catch(reason => console.error(new Error(reason)))
+
+        })
+        .catch(reason => console.error('Suppression de l\'index échouée' + reason.message));
+
+});
 
 // Observe /requests childs on Firebase Database.
 // Call ElasticSearch with the query parameters and write the result from ES to /requests/{requestId}/results in Firebase Database
@@ -107,7 +167,7 @@ exports.observeRequest = functions.database.ref('/requests/{requestId}/')
                     const hits = resp.hits.hits;
                     console.log("Response", resp);
 
-                    if (resp.hits.total > 0) {
+                    if (!isUndefined(resp.hits.hits) && (resp.hits.hits.length > 0)) {
                         snapshot.ref.child('results').set(hits)
                             .then(value => console.log('Insertion réussie'))
                             .catch(a => console.error('Insertion dans results échouée : ' + a.message));
@@ -131,7 +191,7 @@ exports.deleteOutdatedRequests = functions.https.onRequest((req, res) => {
         // Liste toutes les requêtes rangées par timestamp
         db.ref('/requests/').orderByChild('timestamp').once('value', listRequests => {
 
-            console.log('Liste des requêtes à traiter : ' + listRequests);
+            console.log('Liste des requêtes à traiter : ' + listRequests.val());
 
             // Parcourt de la liste des requêtes pour savoir celles qui sont à supprimer
             if (listRequests.forEach(fbRequest => {

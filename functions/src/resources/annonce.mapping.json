@@ -2,10 +2,35 @@
   "mappings": {
     "annonce": {
       "properties": {
-        "uuid": {
-          "type": "text"
+        "categorie": {
+          "properties": {
+            "id": {
+              "type": "long"
+            },
+            "libelle": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
         },
-        "titre": {
+        "contactEmail": {
+          "type": "boolean"
+        },
+        "contactMsg": {
+          "type": "boolean"
+        },
+        "contactTel": {
+          "type": "boolean"
+        },
+        "datePublication": {
+          "type": "long"
+        },
+        "description": {
           "type": "text",
           "fields": {
             "keyword": {
@@ -14,7 +39,7 @@
             }
           }
         },
-        "description": {
+        "photos": {
           "type": "text",
           "fields": {
             "keyword": {
@@ -26,17 +51,61 @@
         "prix": {
           "type": "long"
         },
-        "idCategorie": {
-          "type": "long"
+        "titre": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         },
-        "datePublication": {
-          "type": "date",
-          "format": "strict_date_optional_time||epoch_millis"
-        },
-        "photos": {
+        "utilisateur": {
           "properties": {
-            "firebasePath": {
-              "type": "text"
+            "email": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "profile": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "telephone": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "uuid": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "uuid": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }
