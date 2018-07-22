@@ -1,27 +1,40 @@
-import * as fbfunctions from 'firebase-functions';
 import {isUndefined} from "util";
+import * as admin from "firebase-admin";
+import ServerValue = admin.database.ServerValue;
 
-const elasticsearch = require('elasticsearch');
-const _ = require('lodash');
+const functions = require('firebase-functions');
+
+
 const request = require('request-promise');
+const elasticSearchConfig = functions.config().elasticsearch;
 
-const admin = require('firebase-admin');
-const serviceAccount = require('../serviceAccountKey.json');
-
-const elasticSearchConfig = fbfunctions.config().elasticsearch;
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: 'https://oliweb-ec245.firebaseio.com/'
-});
+admin.initializeApp();
 
 const db = admin.database();
 
+function getServerTimestamp(): Promise<number> {
+    return new Promise((resolve, reject) => {
+        db.ref('timestamp').child('now').set(ServerValue.TIMESTAMP, function (error) {
+            if (error) {
+                reject(error);
+            } else {
+                db.ref('timestamp').child('now').once('value').then(
+                    (data) => {
+                        resolve(data.val());
+                    }, (error1) => {
+                        reject(error1);
+                    }
+                );
+            }
+        }).catch(reason => reject(new Error(reason)))
+    });
+}
+
 // Function d'indexation des annonces
-exports.indexAnnonceToElastic = fbfunctions.database.ref('/categories/{annonceId}/')
-    .onWrite(event => {
-        const annonceData = event.data.val();
-        const annonceId = event.params.annonceId;
+exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
+    .onWrite((data, context) => {
+        const annonceData = data.after.val();
+        const annonceId = context.params.annonceId;
 
         console.log('Indexing annonce ', annonceId, annonceData);
 
@@ -41,35 +54,45 @@ exports.indexAnnonceToElastic = fbfunctions.database.ref('/categories/{annonceId
             json: true
         };
 
-        return request(elasticsearchRequest).then(response => {
-            console.log('Elasticsearch response', response);
-        })
-
+        return request(elasticsearchRequest)
+            .then(response => {
+                console.log('Elasticsearch response', response);
+            })
+            .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
     });
 
-// Observe /requests child on Firebase Database.
-// Call ElasticSearch with the query parameters and write the result from ES to /requests/{requestId}/results in Firebase Database.
+// Observe /requests childs on Firebase Database.
+// Call ElasticSearch with the query parameters and write the result from ES to /requests/{requestId}/results in Firebase Database
+// Or set /requests/{requestId}/no_results = true if no result is return by Elasticsearch
 // This way the mobile application never talk to ES directly
-exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
-    .onWrite(event => {
+exports.observeRequest = functions.database.ref('/requests/{requestId}/')
+    .onCreate((snapshot, context) => {
 
             // Récupération de la requête et de son Id
-            const requestData = event.data.val();
-            const requestId = event.params.requestId;
+            const requestData = snapshot.val();
+            const requestId = context.params.requestId;
 
             console.log('Request ', requestId, requestData);
 
             // We want avoid infinite loop, so we continue only if requestData !== null && results has not been set already.
             if (requestData && isUndefined(requestData.results) && isUndefined(requestData.no_results)) {
 
-                const elasticSearchConfig = fbfunctions.config().elasticsearch;
+                // On envoie pas le timestamp à Elasticsearch, car cette donnée n'est utilisée que pour voir quand la request a été créé
+                if (!isUndefined(requestData.timestamp)) {
+                    delete requestData['timestamp'];
+                }
 
-                // Lancement de la recherche
-                const elasticSearchUrl = elasticSearchConfig.url + 'annonces/_search';
+                // Lorsque l'on fait un tri sur le titre, il faut remplacer titre par titre.keyword pour qu'Elasticsearch fasse la bonne requête.
+                let jsonSortString = JSON.stringify(requestData.sort);
+                if (jsonSortString.includes("titre")) {
+                    jsonSortString = jsonSortString.replace("titre", "titre.keyword");
+                    requestData.sort = JSON.parse(jsonSortString);
+                }
 
+                // Construction de la requête ES
                 const elasticsearchRequest = {
                     method: 'POST',
-                    uri: elasticSearchUrl,
+                    uri: elasticSearchConfig.url + 'annonces/_search',
                     auth: {
                         username: elasticSearchConfig.username,
                         password: elasticSearchConfig.password,
@@ -78,71 +101,56 @@ exports.observeRequest = fbfunctions.database.ref('/requests/{requestId}/')
                     json: true
                 };
 
+                // Lancement de la recherche
                 return request(elasticsearchRequest).then(resp => {
                     // Récupération du résultat et écriture dans notre FirebaseDatabase
                     const hits = resp.hits.hits;
                     console.log("Response", resp);
 
                     if (resp.hits.total > 0) {
-                        event.data.ref.child('results').set(hits)
+                        snapshot.ref.child('results').set(hits)
                             .then(value => console.log('Insertion réussie'))
-                            .catch(a => console.log('Insertion dans results échouée : ' + a.message));
+                            .catch(a => console.error('Insertion dans results échouée : ' + a.message));
                     } else {
-                        event.data.ref.child('no_results').set(true)
+                        snapshot.ref.child('no_results').set(true)
                             .then(value => console.log('Insertion réussie : aucun élément trouvé'))
-                            .catch(a => console.log('Insertion dans results échouée : ' + a.message));
+                            .catch(a => console.error('Insertion dans results échouée : ' + a.message));
                     }
 
-                }).catch(reason => console.log('Houla ca va pas du tout la !' + reason.message));
+                }).catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
             } else {
                 return true;
             }
         }
     );
 
-// Observe /annonces child on Firebase Database.
-// Insertion des annonces dans l'index des categories
-exports.observeRequest = fbfunctions.database.ref('/annonces/{annonceId}/')
-    .onWrite(event => {
-            // Récupération de la requête et de son Id
-            const requestData = event.data.val();
-            const requestId = event.params.requestId;
+// Cloud function qui sera appelée toutes les 5 minutes pour supprimer les requests qui ont plus de 1 minutes
+exports.deleteOutdatedRequests = functions.https.onRequest((req, res) => {
+    return getServerTimestamp().then(serverTimestamp => {
 
-            console.log('Request ', requestId, requestData);
+        // Liste toutes les requêtes rangées par timestamp
+        db.ref('/requests/').orderByChild('timestamp').once('value', listRequests => {
 
-            const ref = db.ref("/categories/");
+            console.log('Liste des requêtes à traiter : ' + listRequests);
 
-            const elasticSearchConfig = fbfunctions.config().elasticsearch;
-
-            // Lancement de la recherche
-            const elasticSearchUrl = elasticSearchConfig.url + 'annonces/_search';
-
-            const elasticsearchRequest = {
-                method: 'POST',
-                uri: elasticSearchUrl,
-                auth: {
-                    username: elasticSearchConfig.username,
-                    password: elasticSearchConfig.password,
-                },
-                body: requestData,
-                json: true
-            };
-
-            return request(elasticsearchRequest).then(resp => {
-                // Récupération du résultat et écriture dans notre FirebaseDatabase
-                const hits = resp.hits.hits;
-                console.log("Response", resp);
-
-                if (resp.hits.total > 0) {
-                    event.data.ref.child('results').set(hits)
-                        .then(value => console.log('Insertion réussie'))
-                        .catch(a => console.log('Insertion dans results échouée : ' + a.message));
-                } else {
-                    event.data.ref.child('no_results').set(true)
-                        .then(value => console.log('Insertion réussie : aucun élément trouvé'))
-                        .catch(a => console.log('Insertion dans results échouée : ' + a.message));
+            // Parcourt de la liste des requêtes pour savoir celles qui sont à supprimer
+            if (listRequests.forEach(fbRequest => {
+                if (serverTimestamp > Number(fbRequest.child('timestamp').val()) + 60 * 1000) {
+                    fbRequest.ref.remove()
+                        .then(value => console.log('Requête supprimée car trop longue : ' + value))
+                        .catch(reason => console.error(new Error('Une requête n\' pas pu être supprimée. Raisons : ' + reason)))
                 }
-
-            }).catch(reason => console.log('Houla ca va pas du tout la !' + reason.message));
-        }
-    );
+                return true;
+            })) {
+                console.log('Tout s\'est bien passé');
+                res.status(200).send('OK');
+            } else {
+                console.log('Y a eu un soucis avec la boucle de mise à jour');
+                res.status(303).send('FOR LOOP FAIL');
+            }
+        }).catch(reason => {
+            console.log('Y a eu un soucis avec la lecture de la liste');
+            res.status(303).send(reason);
+        })
+    });
+});
