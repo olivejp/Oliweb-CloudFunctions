@@ -7,7 +7,7 @@ import NotificationMessageClass from "./NotificationMessageClass";
 
 admin.initializeApp();
 
-// TODO Terminer cette function
+// TODO Tester cette function
 // Cloud function permettant d'envoyer une notification
 // Dès que quelqu'un reçoit un message.
 exports.sendMessageNotification = NotificationMessageClass.notificationMessageCloudFunction;

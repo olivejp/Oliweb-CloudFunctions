@@ -7,7 +7,7 @@ const DeleteOutdatedRequestsClass_1 = require("./DeleteOutdatedRequestsClass");
 const ReindexElasticsearchClass_1 = require("./ReindexElasticsearchClass");
 const NotificationMessageClass_1 = require("./NotificationMessageClass");
 admin.initializeApp();
-// TODO Terminer cette function
+// TODO Tester cette function
 // Cloud function permettant d'envoyer une notification
 // Dès que quelqu'un reçoit un message.
 exports.sendMessageNotification = NotificationMessageClass_1.default.notificationMessageCloudFunction;
