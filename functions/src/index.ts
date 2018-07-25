@@ -274,40 +274,29 @@ exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
 // Cloud function qui permettra de supprimer l'index annonces sur ES
 // Relire toutes la DB sur Firebase Database et réindexer toutes les annonces
 exports.reindexElasticsearch = functions.https.onRequest((req, res) => {
-
-    if (req.method !== 'POST') {
-        res.status(405).send('Méthode non autorisée');
-        return null;
-    }
-
-    if (req.get('user') !== functions.config().reindex.user && req.get('password') !== functions.config().reindex.password) {
-        res.status(403).send('Utilisateur non autorisé');
-        return null;
-    }
-
-    const deleteAnnoncesIndex = {
-        method: 'DELETE',
-        uri: elasticSearchConfig.url + elasticIndexName,
-        auth: {
-            username: elasticSearchConfig.username,
-            password: elasticSearchConfig.password,
+    return new Promise((resolve, reject) => {
+        if (req.method !== 'POST') {
+            res.status(405).send('Méthode non autorisée');
+            reject('Méthode non autorisée');
+            return this;
         }
-    };
-    const createAnnoncesIndex = {
-        method: 'PUT',
-        uri: elasticSearchConfig.url + elasticIndexName,
-        auth: {
-            username: elasticSearchConfig.username,
-            password: elasticSearchConfig.password,
-        },
-        body: JSON.stringify(mappings)
-    };
 
-    // Suppression de l'index
-    return request(deleteAnnoncesIndex)
-        .then(response => {
+        if (req.get('user') !== functions.config().reindex.user || req.get('password') !== functions.config().reindex.password) {
+            res.status(403).send('Utilisateur non autorisé');
+            reject('Utilisateur non autorisé');
+            return this;
+        }
 
-            console.log('Suppression de l\'index ' + elasticIndexName + ' réussi', response);
+        function createIndex() {
+            const createAnnoncesIndex = {
+                method: 'PUT',
+                uri: elasticSearchConfig.url + elasticIndexName,
+                auth: {
+                    username: elasticSearchConfig.username,
+                    password: elasticSearchConfig.password,
+                },
+                body: JSON.stringify(mappings)
+            };
 
             // Création de notre nouvel index
             request(createAnnoncesIndex)
@@ -327,8 +316,30 @@ exports.reindexElasticsearch = functions.https.onRequest((req, res) => {
                         .catch((reason) => console.error(new Error(reason)));
                 })
                 .catch((reason) => console.error('Création de l\'index ' + elasticIndexName + ' échouée : ' + reason.message));
-        })
-        .catch(reason => console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message));
+        }
+
+        // Suppression de l'index
+        const deleteAnnoncesIndex = {
+            method: 'DELETE',
+            uri: elasticSearchConfig.url + elasticIndexName,
+            auth: {
+                username: elasticSearchConfig.username,
+                password: elasticSearchConfig.password,
+            }
+        };
+        request(deleteAnnoncesIndex)
+            .then(response => {
+                console.log('Suppression de l\'index ' + elasticIndexName + ' réussi', response);
+                createIndex();
+            })
+            .catch(reason => {
+                if (reason.error.status === 404) {
+                    createIndex();
+                } else {
+                    console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message);
+                }
+            });
+    });
 });
 
 // Observe /requests childs on Firebase Database.
