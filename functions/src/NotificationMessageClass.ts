@@ -35,19 +35,19 @@ export default class NotificationMessageClass {
 
     /**
      *
-     * @param {string} token
+     * @param {string[]} tokens
      * @param {string} annonceTitre
      * @param {string} message
      * @returns {Promise<MessagingDevicesResponse>}
      */
-    private static sendNotification(token: string, annonceTitre: string, message: string): Promise<MessagingDevicesResponse> {
+    private static sendNotification(tokens: string[], annonceTitre: string, message: string): Promise<MessagingDevicesResponse> {
         const payload = {
             notification: {
                 title: annonceTitre,
                 body: message
             }
         };
-        return admin.messaging().sendToDevice(token, payload);
+        return admin.messaging().sendToDevice(tokens, payload);
     }
 
     /**
@@ -79,11 +79,9 @@ export default class NotificationMessageClass {
                     // TODO voir la solution proposée ici https://stackoverflow.com/questions/39875243/promises-in-the-foreach-loop-typescript-2
                     NotificationMessageClass.getTokens(receiverIds)
                         .then(tokens => {
-                            for (let token of tokens) {
-                                NotificationMessageClass.sendNotification(token, chatData.titreAnnonce, messageData)
-                                    .then(value => console.log('Message correctement envoyé'))
-                                    .catch(reason => console.error(new Error(reason)));
-                            }
+                            NotificationMessageClass.sendNotification(tokens, chatData.titreAnnonce, messageData)
+                                .then(value => console.log('Messages correctement envoyés'))
+                                .catch(reason => console.error(new Error(reason)));
                         })
                         .catch(reason => console.error(new Error(reason)));
                 })
