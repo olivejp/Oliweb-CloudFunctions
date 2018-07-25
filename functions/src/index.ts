@@ -7,6 +7,129 @@ const request = require('request-promise');
 const elasticSearchConfig = functions.config().elasticsearch;
 const elasticIndexName: string = 'biloutes';
 
+// TODO sortir cet objet dans un fichier ressource et y faire référence.
+const mappings = {
+    "settings": {
+        "index": {
+            "number_of_shards": 5,
+            "number_of_replicas": 1
+        }
+    },
+    "mappings": {
+        "annonce": {
+            "properties": {
+                "categorie": {
+                    "properties": {
+                        "id": {
+                            "type": "long"
+                        },
+                        "libelle": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
+                },
+                "contactEmail": {
+                    "type": "boolean"
+                },
+                "contactMsg": {
+                    "type": "boolean"
+                },
+                "contactTel": {
+                    "type": "boolean"
+                },
+                "datePublication": {
+                    "type": "long"
+                },
+                "description": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "photos": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "prix": {
+                    "type": "long"
+                },
+                "titre": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "utilisateur": {
+                    "properties": {
+                        "email": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "profile": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "telephone": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "uuid": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
+                },
+                "uuid": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
 admin.initializeApp();
 
 const db = admin.database();
@@ -47,74 +170,75 @@ function indexation(annonce: any): Promise<any> {
     return request(elasticsearchRequest);
 }
 
-// TODO Terminer cette function
-// Cloud function permettant d'envoyer une notification
-// Dès que quelqu'un reçoit un message.
-exports.observeRequest = functions.database.ref('/messages/{chatId}/{messageId}')
-    .onCreate((snapshot, context) => {
-
-        // Récupération de la requête et de son Id
-        const messageData = snapshot.val();
-        const chatId = context.params.chatId;
-        const messageId = context.params.messageId;
-        const authorId = messageData.uidAuthor;
-
-        console.log('Message envoyé ', messageId, messageData);
-
-        // Récupération du chat
-        const db.ref('/chats/${chatId}').once('value')
-            .catch(reason => console.error(new Error(reason)))
-            .then(chatData => {
-
-                // Récupération du tableau des membres participants au chat
-                let mapMembers: Map<string, boolean> = new Map<string, boolean>();
-                Object.keys(chatData.members).forEach(key => {
-                    if (chatData.members[key] === true) {
-                        this.mapMembers.set(key, chatData.members[key]);
-                    }
-                });
-
-                // Déduction des receveurs de la notification (tous sauf l'auteur)
-                let receiverIds = [];
-                for (let memberId: string of mapMembers.keys()){
-                    if (memberId !== authorId) {
-                        receiverIds.push(memberId);
-                    }
-                }
-
-                // Récupération du token dans les paramètres des utilisateurs
-                // TODO voir la solution proposée ici https://stackoverflow.com/questions/39875243/promises-in-the-foreach-loop-typescript-2
-                const tokens = [];
-                function searchTokens(receiverIds): Promise<any>{
-                    let promiseArray: Array<any> = [];
-                    for(let userId: string of receiverIds) {
-                        promiseArray.push()
-                        const db.ref('/users/${userId}').once('value')
-                            .catch(reason => console.error(new Error(reason)))
-                            .then(user => {
-                                tokens.push(user.tokenDevice)
-                            });
-                    }
-                    return Promise.all(promiseArray);
-                }
-
-                searchTokens(receiverIds).then(value => {
-
-                });
-
-                // Notification details.
-                const payload = {
-                    notification: {
-                        title: 'You have a new follower!',
-                        body: '${follower.displayName} is now following you',
-                        icon: follower.photoURL
-                    }
-                };
-            });
-
-        return admin.messaging().sendToDevice(token, payload);
-
-    });
+//
+// // TODO Terminer cette function
+// // Cloud function permettant d'envoyer une notification
+// // Dès que quelqu'un reçoit un message.
+// exports.observeRequest = functions.database.ref('/messages/{chatId}/{messageId}')
+//     .onCreate((snapshot, context) => {
+//
+//         // Récupération de la requête et de son Id
+//         const messageData = snapshot.val();
+//         const chatId = context.params.chatId;
+//         const messageId = context.params.messageId;
+//         const authorId = messageData.uidAuthor;
+//
+//         console.log('Message envoyé ', messageId, messageData);
+//
+//         // Récupération du chat
+//         const db.ref('/chats/${chatId}').once('value')
+//             .catch(reason => console.error(new Error(reason)))
+//             .then(chatData => {
+//
+//                 // Récupération du tableau des membres participants au chat
+//                 let mapMembers: Map<string, boolean> = new Map<string, boolean>();
+//                 Object.keys(chatData.members).forEach(key => {
+//                     if (chatData.members[key] === true) {
+//                         this.mapMembers.set(key, chatData.members[key]);
+//                     }
+//                 });
+//
+//                 // Déduction des receveurs de la notification (tous sauf l'auteur)
+//                 let receiverIds = [];
+//                 for (let memberId: string of mapMembers.keys()){
+//                     if (memberId !== authorId) {
+//                         receiverIds.push(memberId);
+//                     }
+//                 }
+//
+//                 // Récupération du token dans les paramètres des utilisateurs
+//                 // TODO voir la solution proposée ici https://stackoverflow.com/questions/39875243/promises-in-the-foreach-loop-typescript-2
+//                 const tokens = [];
+//                 function searchTokens(receiverIds): Promise<any>{
+//                     let promiseArray: Array<any> = [];
+//                     for(let userId: string of receiverIds) {
+//                         promiseArray.push()
+//                         const db.ref('/users/${userId}').once('value')
+//                             .catch(reason => console.error(new Error(reason)))
+//                             .then(user => {
+//                                 tokens.push(user.tokenDevice)
+//                             });
+//                     }
+//                     return Promise.all(promiseArray);
+//                 }
+//
+//                 searchTokens(receiverIds).then(value => {
+//
+//                 });
+//
+//                 // Notification details.
+//                 const payload = {
+//                     notification: {
+//                         title: 'You have a new follower!',
+//                         body: '${follower.displayName} is now following you',
+//                         icon: follower.photoURL
+//                     }
+//                 };
+//             });
+//
+//         return admin.messaging().sendToDevice(token, payload);
+//
+//     });
 
 // Function d'indexation des annonces
 exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
@@ -147,11 +271,20 @@ exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
             .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
     });
 
-// TODO tester cette function
 // Cloud function qui permettra de supprimer l'index annonces sur ES
 // Relire toutes la DB sur Firebase Database et réindexer toutes les annonces
 exports.reindexElasticsearch = functions.https.onRequest((req, res) => {
-    const mappings = require('./resources/annonce.mapping.json');
+
+    if (req.method !== 'POST') {
+        res.status(405).send('Méthode non autorisée');
+        return null;
+    }
+
+    if (req.get('user') !== functions.config().reindex.user && req.get('password') !== functions.config().reindex.password) {
+        res.status(403).send('Utilisateur non autorisé');
+        return null;
+    }
+
     const deleteAnnoncesIndex = {
         method: 'DELETE',
         uri: elasticSearchConfig.url + elasticIndexName,
@@ -167,34 +300,35 @@ exports.reindexElasticsearch = functions.https.onRequest((req, res) => {
             username: elasticSearchConfig.username,
             password: elasticSearchConfig.password,
         },
-        body: mappings
+        body: JSON.stringify(mappings)
     };
 
     // Suppression de l'index
     return request(deleteAnnoncesIndex)
-        .catch(reason => console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message))
         .then(response => {
 
             console.log('Suppression de l\'index ' + elasticIndexName + ' réussi', response);
 
             // Création de notre nouvel index
             request(createAnnoncesIndex)
-                .catch(reason => console.error('Création de l\'index ' + elasticIndexName + ' échouée : ' + reason.message))
-                .then(value => {
-
+                .then((value) => {
                     // Lecture de toutes les annonces
-                    db.ref('/annonces').once('value').then((listAnnonces) => {
-                        console.log('Liste des annonces à réindexer : ' + listAnnonces.val());
+                    db.ref('/annonces').once('value')
+                        .then((listAnnonces) => {
+                            console.log('Liste des annonces à réindexer : ' + listAnnonces.val());
 
-                        // Pour chaque annonce, j'indexe dans ES
-                        for (let annonce of listAnnonces) {
-                            indexation(annonce)
-                                .then(response => console.log('Elasticsearch response', response))
-                                .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
-                        }
-                    });
-                });
-        });
+                            // Pour chaque annonce, j'indexe dans ES
+                            for (const annonces of listAnnonces) {
+                                indexation(annonces)
+                                    .then(indexationResponse => console.log('Elasticsearch response', indexationResponse))
+                                    .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
+                            }
+                        })
+                        .catch((reason) => console.error(new Error(reason)));
+                })
+                .catch((reason) => console.error('Création de l\'index ' + elasticIndexName + ' échouée : ' + reason.message));
+        })
+        .catch(reason => console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message));
 });
 
 // Observe /requests childs on Firebase Database.
