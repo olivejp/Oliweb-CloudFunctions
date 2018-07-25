@@ -3,10 +3,9 @@ import * as admin from "firebase-admin";
 import ServerValue = admin.database.ServerValue;
 
 const functions = require('firebase-functions');
-
-
 const request = require('request-promise');
 const elasticSearchConfig = functions.config().elasticsearch;
+const elasticIndexName: string = 'biloutes';
 
 admin.initializeApp();
 
@@ -36,7 +35,7 @@ function indexation(annonce: any): Promise<any> {
     console.log('Indexing annonce ', annonceId, annonce);
     const elasticsearchRequest = {
         method: 'POST',
-        uri: elasticSearchConfig.url + 'annonces/annonce/' + annonceId,
+        uri: elasticSearchConfig.url + '/' + elasticIndexName + '/annonce/' + annonceId,
         auth: {
             username: elasticSearchConfig.username,
             password: elasticSearchConfig.password,
@@ -83,42 +82,50 @@ exports.indexAnnonceToElastic = functions.database.ref('/annonces/{annonceId}/')
 // Cloud function qui permettra de supprimer l'index annonces sur ES
 // Relire toutes la DB sur Firebase Database et réindexer toutes les annonces
 exports.reindexElasticsearch = functions.https.onRequest((req, res) => {
-
+    const mappings = require('./resources/annonce.mapping.json');
     const deleteAnnoncesIndex = {
         method: 'DELETE',
-        uri: elasticSearchConfig.url + 'annonces',
+        uri: elasticSearchConfig.url + elasticIndexName,
         auth: {
             username: elasticSearchConfig.username,
             password: elasticSearchConfig.password,
         }
     };
+    const createAnnoncesIndex = {
+        method: 'PUT',
+        uri: elasticSearchConfig.url + elasticIndexName,
+        auth: {
+            username: elasticSearchConfig.username,
+            password: elasticSearchConfig.password,
+        },
+        body: mappings
+    };
 
+    // Suppression de l'index
     return request(deleteAnnoncesIndex)
+        .catch(reason => console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message))
         .then(response => {
-            console.log('Suppression de l\'index annonces réussi', response);
 
-            db.ref('/annonces').once('value', listAnnonces => {
-                console.log('Liste des annonces à réindexer : ' + listAnnonces.val());
+            console.log('Suppression de l\'index ' + elasticIndexName + ' réussi', response);
 
-                if (listAnnonces.forEach(annonce => {
-                    indexation(annonce)
-                        .then(response => console.log('Elasticsearch response', response))
-                        .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message))
-                    return true;
-                })) {
-                    console.log('Tout s\'est bien passé');
-                    res.status(200).send('OK');
-                } else {
-                    console.log('Y a eu un soucis avec la boucle de mise à jour');
-                    res.status(303).send('FOR LOOP FAIL');
-                }
+            // Création de notre nouvel index
+            request(createAnnoncesIndex)
+                .catch(reason => console.error('Création de l\'index ' + elasticIndexName + ' échouée : ' + reason.message))
+                .then(value => {
 
+                    // Lecture de toutes les annonces
+                    db.ref('/annonces').once('value').then((listAnnonces) => {
+                        console.log('Liste des annonces à réindexer : ' + listAnnonces.val());
 
-            }).catch(reason => console.error(new Error(reason)))
-
-        })
-        .catch(reason => console.error('Suppression de l\'index échouée' + reason.message));
-
+                        // Pour chaque annonce, j'indexe dans ES
+                        for (let annonce of listAnnonces) {
+                            indexation(annonce)
+                                .then(response => console.log('Elasticsearch response', response))
+                                .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
+                        }
+                    });
+                });
+        });
 });
 
 // Observe /requests childs on Firebase Database.
