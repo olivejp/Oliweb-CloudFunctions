@@ -16,9 +16,9 @@ export default class NotificationMessageClass {
      * @returns {Promise<string[]>} Promesse contenant le tableau des tokens
      */
     private static getTokens(usersIds): Promise<string[]> {
-        let promiseArray: Array<Promise<string>> = [];
-        for (let userId of usersIds) {
-            let promesse: Promise<string> = new Promise<string>((resolve, reject) => {
+        const promiseArray: Array<Promise<string>> = [];
+        for (const userId of usersIds) {
+            const promesse: Promise<string> = new Promise<string>((resolve, reject) => {
                 db.ref('/users/${userId}').once('value')
                     .then(user => {
                         resolve(user.tokenDevice);
@@ -68,7 +68,7 @@ export default class NotificationMessageClass {
                 .then(chatData => {
 
                     // Récupération du tableau des membres participants au chat (tous sauf l'auteur)
-                    let receiverIds = [];
+                    const receiverIds = [];
                     Object.keys(chatData.members).forEach(key => {
                         if (chatData.members[key] === true && key !== authorId) {
                             receiverIds.push(key);
