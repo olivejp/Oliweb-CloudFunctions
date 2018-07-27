@@ -186,15 +186,9 @@ export default class ReindexElasticsearchClass {
         });
     }
 
-    private static async createAndReindex(res: any) {
-        try {
-            await ReindexElasticsearchClass.createIndex();
-            await ReindexElasticsearchClass.listAnnonceToIndex();
-            res.status(200).send('Tout s\'est bien passé');
-        }
-        catch (reason) {
-            res.status(500).send('Erreur du serveur');
-        }
+    private static async createAndReindex() {
+        await ReindexElasticsearchClass.createIndex();
+        await ReindexElasticsearchClass.listAnnonceToIndex();
     }
 
     public static reindexElasticsearchHttpsFunction: HttpsFunction = functions.https.onRequest((req, res) => {
@@ -210,11 +204,21 @@ export default class ReindexElasticsearchClass {
 
         ReindexElasticsearchClass.deleteIndex()
             .then((response) => {
-                ReindexElasticsearchClass.createAndReindex(res);
+                ReindexElasticsearchClass.createAndReindex()
+                    .then(value => res.status(200).send())
+                    .catch(reason => {
+                        console.error(reason);
+                        res.status(500).send();
+                    });
             })
             .catch((reason) => {
                 if (reason.error.status === 404) {
-                    ReindexElasticsearchClass.createAndReindex(res);
+                    ReindexElasticsearchClass.createAndReindex()
+                        .then(value => res.status(200).send())
+                        .catch(reason1 => {
+                            console.error(reason1);
+                            res.status(500).send();
+                        });
                 } else {
                     console.error(reason);
                 }
