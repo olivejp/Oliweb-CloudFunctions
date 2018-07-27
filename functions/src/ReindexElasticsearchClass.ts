@@ -175,52 +175,49 @@ export default class ReindexElasticsearchClass {
         return request(createAnnoncesIndex);
     }
 
-    private static listAnnonceToIndex() {
-        db.ref('/annonces').once('value')
-            .then((snapshotListAnnonces) => {
-                const listAnnonce = snapshotListAnnonces.val();
-                console.log('Liste des annonces à réindexer : ' + listAnnonce);
-
-                // Pour chaque annonce, j'indexe dans ES
-                for (const annonces of listAnnonce) {
-                    ReindexElasticsearchClass.indexation(annonces)
-                        .then(indexationResponse => console.log('Elasticsearch response', indexationResponse))
-                        .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
-                }
-            })
-            .catch((reason) => console.error(new Error(reason)));
+    private static listAnnonceToIndex(): Promise<any> {
+        return db.ref('/annonces').once('value').then((snapshotListAnnonces) => {
+            const listAnnonce = snapshotListAnnonces.val();
+            const listPromiseIndex = [];
+            for (const annonce of listAnnonce) {
+                listPromiseIndex.push(ReindexElasticsearchClass.indexation(annonce));
+            }
+            return Promise.all(listPromiseIndex);
+        });
     }
 
-    // TODO Finir cette méthode
+    private static async createAndReindex(res: any) {
+        try {
+            await ReindexElasticsearchClass.createIndex();
+            await ReindexElasticsearchClass.listAnnonceToIndex();
+            res.status(200).send('Tout s\'est bien passé');
+        }
+        catch (reason) {
+            res.status(500).send('Erreur du serveur');
+        }
+    }
+
     public static reindexElasticsearchHttpsFunction: HttpsFunction = functions.https.onRequest((req, res) => {
-        return new Promise((resolve, reject) => {
-            if (req.method !== 'POST') {
-                res.status(405).send('Méthode non autorisée');
-                reject('Méthode non autorisée');
-                return null;
-            }
+        if (req.method !== 'POST') {
+            res.status(405).send('Méthode non autorisée');
+            return null;
+        }
 
-            if (req.get('user') !== functions.config().reindex.user || req.get('password') !== functions.config().reindex.password) {
-                res.status(403).send('Utilisateur non autorisé');
-                reject('Utilisateur non autorisé');
-                return null;
-            }
+        if (req.get('user') !== functions.config().reindex.user || req.get('password') !== functions.config().reindex.password) {
+            res.status(403).send('Utilisateur non autorisé');
+            return null;
+        }
 
-
-            // Suppression de l'index
-            ReindexElasticsearchClass.deleteIndex()
-                .then(response => {
-                    console.log('Suppression de l\'index ' + elasticIndexName + ' réussi', response);
-                    ReindexElasticsearchClass.createIndex();
-                })
-                .catch(reason => {
-                    if (reason.error.status === 404) {
-                        ReindexElasticsearchClass.createIndex();
-                    } else {
-                        console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message);
-                    }
-                });
-        });
+        ReindexElasticsearchClass.deleteIndex()
+            .then((response) => {
+                ReindexElasticsearchClass.createAndReindex(res);
+            })
+            .catch((reason) => {
+                if (reason.error.status === 404) {
+                    ReindexElasticsearchClass.createAndReindex(res);
+                } else {
+                    console.error(reason);
+                }
+            })
     })
-
 }

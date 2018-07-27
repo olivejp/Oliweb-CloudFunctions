@@ -1,6 +1,6 @@
 import {HttpsFunction} from "firebase-functions";
 import * as admin from "firebase-admin";
-import {getServerTimestamp} from "./GetServerTimestamp";
+import {getServerTimestamp} from "./Utility";
 import DataSnapshot = admin.database.DataSnapshot;
 
 const functions = require('firebase-functions');
