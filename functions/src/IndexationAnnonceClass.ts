@@ -1,8 +1,8 @@
 import {CloudFunction} from "firebase-functions";
-
-const functions = require('firebase-functions');
 import * as admin from "firebase-admin";
 import * as request from "request-promise";
+
+const functions = require('firebase-functions');
 
 try {
     admin.initializeApp(functions.config().firebase);
@@ -31,9 +31,7 @@ export default class IndexationAnnonceClass {
             };
 
             return request(elasticsearchRequest)
-                .then(response => {
-                    console.log('Elasticsearch response', response);
-                })
+                .then(response => console.log('Elasticsearch response', response))
                 .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
         });
 }
