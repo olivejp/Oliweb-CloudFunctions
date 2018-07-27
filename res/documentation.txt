@@ -1,0 +1,10 @@
+How to run Firebase cloud functions locally
+
+cd functions/
+npm run-script lint                             //Will check the code
+npm run-script build                            //Will build the application in Javascript
+firebase serve --only functions                 //Emulate the http cloud functions
+
+// then do a
+
+curl <http-function-adress>                     //Call the http cloud function

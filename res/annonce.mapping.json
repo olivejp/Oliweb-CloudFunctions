@@ -1,44 +1,13 @@
 {
+  "settings": {
+    "index": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    }
+  },
   "mappings": {
     "annonce": {
       "properties": {
-        "uuid": {
-          "type": "text"
-        },
-        "titre": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "description": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 1024
-            }
-          }
-        },
-        "prix": {
-          "type": "long"
-        },
-        "utilisateur": {
-          "properties": {
-            "email": {
-              "type": "text"
-            },
-            "uuid": {
-              "type": "text"
-            },
-            "telephone": {
-              "type": "text"
-            }
-          }
-        },
         "categorie": {
           "properties": {
             "id": {
@@ -55,17 +24,98 @@
             }
           }
         },
+        "contactEmail": {
+          "type": "boolean"
+        },
+        "contactMsg": {
+          "type": "boolean"
+        },
+        "contactTel": {
+          "type": "boolean"
+        },
         "datePublication": {
           "type": "long"
         },
+        "description": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
         "photos": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "prix": {
+          "type": "long"
+        },
+        "titre": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "utilisateur": {
           "properties": {
-            "firebasePath": {
-              "type": "text"
+            "email": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "profile": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "telephone": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "uuid": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "uuid": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }
       }
     }
   }
-}
+}}
