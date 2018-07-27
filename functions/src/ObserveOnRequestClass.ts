@@ -54,7 +54,7 @@ export default class ObserveOnRequestClass {
             const requestData = snapshot.val();
 
             // We want avoid infinite loop, so we continue only if requestData !== null && results has not been set already.
-            if (requestData || !isUndefined(requestData.results) || !isUndefined(requestData.no_results)) {
+            if (!requestData || !isUndefined(requestData.results) || !isUndefined(requestData.no_results)) {
                 return true;
             }
 
