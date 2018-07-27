@@ -25,7 +25,8 @@ export default class NotificationMessageClass {
         for (const userId of usersIds) {
             const promesse: Promise<string> = new Promise<string>((resolve, reject) => {
                 db.ref('/users/${userId}').once('value')
-                    .then(user => {
+                    .then(snapshotUser => {
+                        const user = snapshotUser.val();
                         resolve(user.tokenDevice);
                     })
                     .catch(reason => {
@@ -70,10 +71,11 @@ export default class NotificationMessageClass {
 
             // Récupération du chat
             return db.ref('/chats/${chatId}').once('value')
-                .then(chatData => {
+                .then(snapshotChat => {
 
                     // Récupération du tableau des membres participants au chat (tous sauf l'auteur)
                     const receiverIds = [];
+                    const chatData = snapshotChat.val();
                     Object.keys(chatData.members).forEach(key => {
                         if (chatData.members[key] === true && key !== authorId) {
                             receiverIds.push(key);
@@ -81,15 +83,11 @@ export default class NotificationMessageClass {
                     });
 
                     // Récupération du token dans les paramètres des utilisateurs
-                    // TODO voir la solution proposée ici https://stackoverflow.com/questions/39875243/promises-in-the-foreach-loop-typescript-2
-                    NotificationMessageClass.getTokens(receiverIds)
+                    return NotificationMessageClass.getTokens(receiverIds)
                         .then(tokens => {
-                            NotificationMessageClass.sendNotification(tokens, chatData.titreAnnonce, messageData)
-                                .then(value => console.log('Messages correctement envoyés'))
-                                .catch(reason => console.error(new Error(reason)));
-                        })
-                        .catch(reason => console.error(new Error(reason)));
-                })
-                .catch(reason => console.error(new Error(reason)));
+                            return NotificationMessageClass.sendNotification(tokens, chatData.titreAnnonce, messageData)
+                                .then(value => console.log('Messages correctement envoyés'));
+                        });
+                });
         });
 }
