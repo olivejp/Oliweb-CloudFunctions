@@ -1,6 +1,7 @@
 import {HttpsFunction} from "firebase-functions";
 import * as admin from "firebase-admin";
 import {getServerTimestamp} from "./GetServerTimestamp";
+import DataSnapshot = admin.database.DataSnapshot;
 
 const functions = require('firebase-functions');
 try {
@@ -10,35 +11,39 @@ try {
 const db = admin.database();
 
 export default class DeleteOutdatedRequestsClass {
-    public static deleteOutdatedRequestsCloudFunction: HttpsFunction = functions.https.onRequest((req, res) => {
-        return getServerTimestamp()
-            .then(serverTimestamp => {
+
+    private static getPromises(tabRequest: DataSnapshot, timestampServer: number): Array<Promise<any>> {
+        const promisesResult = [];
+        tabRequest.forEach(request => {
+            if (timestampServer > Number(request.child('timestamp').val()) + 60 * 1000) {
+                promisesResult.push(request.ref.remove());
+            }
+            return true;
+        });
+        return promisesResult;
+    }
+
+    public static deleteOutdatedRequestsCloudFunction: HttpsFunction = functions.https.onRequest(async (req, res) => {
+            try {
+                // Get the timestamp from the server
+                const serverTimestamp = await getServerTimestamp();
 
                 // Liste toutes les requêtes rangées par timestamp
-                db.ref('/requests/').orderByChild('timestamp').once('value', listRequests => {
+                const listRequests = await db.ref('/requests/').once('value');
 
-                    console.log('Liste des requêtes à traiter : ' + listRequests.val());
+                // Parcourt de la liste des requêtes pour savoir celles qui sont à supprimer
+                const listPromisesRequestToDelete = DeleteOutdatedRequestsClass.getPromises(listRequests, serverTimestamp);
 
-                    // Parcourt de la liste des requêtes pour savoir celles qui sont à supprimer
-                    if (listRequests.forEach(fbRequest => {
-                        if (serverTimestamp > Number(fbRequest.child('timestamp').val()) + 60 * 1000) {
-                            fbRequest.ref.remove()
-                                .then(value => console.log('Requête supprimée car trop longue : ' + value))
-                                .catch(reason => console.error(new Error('Une requête n\' pas pu être supprimée. Raisons : ' + reason)))
-                        }
-                        return true;
-                    })) {
+                Promise.all(listPromisesRequestToDelete)
+                    .then(value => {
                         console.log('Tout s\'est bien passé');
                         res.status(200).send('OK');
-                    } else {
-                        console.log('Y a eu un soucis avec la boucle de mise à jour');
-                        res.status(303).send('FOR LOOP FAIL');
-                    }
-                }).catch(reason => {
-                    console.log('Y a eu un soucis avec la lecture de la liste');
-                    res.status(303).send(reason);
-                })
-            })
-            .catch(reason => console.error(reason));
-    });
+                    })
+                    .catch(reason => res.status(303).send(reason));
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('FAIL');
+            }
+        }
+    );
 }
