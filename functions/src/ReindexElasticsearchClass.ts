@@ -1,8 +1,12 @@
+const functions = require('firebase-functions');
 import {HttpsFunction} from "firebase-functions";
 import * as admin from "firebase-admin";
 
+try {
+    admin.initializeApp(functions.config().firebase);
+} catch (e) {
+}
 const request = require('request-promise');
-const functions = require('firebase-functions');
 const db = admin.database();
 const elasticIndexName: string = 'biloutes';
 const elasticSearchConfig = functions.config().elasticsearch;

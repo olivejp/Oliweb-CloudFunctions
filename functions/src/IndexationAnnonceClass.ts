@@ -1,9 +1,15 @@
 import {CloudFunction} from "firebase-functions";
-import * as admin from "firebase-admin";
-import * as request  from "request-promise";
-import DataSnapshot = admin.database.DataSnapshot;
 
 const functions = require('firebase-functions');
+import * as admin from "firebase-admin";
+import * as request from "request-promise";
+
+try {
+    admin.initializeApp(functions.config().firebase);
+} catch (e) {
+}
+import DataSnapshot = admin.database.DataSnapshot;
+
 const elasticSearchConfig = functions.config().elasticsearch;
 
 export default class IndexationAnnonceClass {

@@ -5,7 +5,11 @@ import DeleteOutdatedRequestsClass from "./DeleteOutdatedRequestsClass";
 import ReindexElasticsearchClass from "./ReindexElasticsearchClass";
 import NotificationMessageClass from "./NotificationMessageClass";
 
-admin.initializeApp();
+const functions = require('firebase-functions');
+try {
+    admin.initializeApp(functions.config().firebase);
+} catch (e) {
+}
 
 // TODO Tester cette function
 // Cloud function permettant d'envoyer une notification

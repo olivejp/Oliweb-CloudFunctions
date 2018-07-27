@@ -1,9 +1,14 @@
+const functions = require('firebase-functions');
 import {CloudFunction} from "firebase-functions";
 import * as admin from "firebase-admin";
+
+try {
+    admin.initializeApp(functions.config().firebase);
+} catch (e) {
+}
 import DataSnapshot = admin.database.DataSnapshot;
 import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
 
-const functions = require('firebase-functions');
 const db = admin.database();
 
 export default class NotificationMessageClass {
