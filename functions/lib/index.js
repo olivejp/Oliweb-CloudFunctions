@@ -6,7 +6,12 @@ const ObserveOnRequestClass_1 = require("./ObserveOnRequestClass");
 const DeleteOutdatedRequestsClass_1 = require("./DeleteOutdatedRequestsClass");
 const ReindexElasticsearchClass_1 = require("./ReindexElasticsearchClass");
 const NotificationMessageClass_1 = require("./NotificationMessageClass");
-admin.initializeApp();
+const functions = require('firebase-functions');
+try {
+    admin.initializeApp(functions.config().firebase);
+}
+catch (e) {
+}
 // TODO Tester cette function
 // Cloud function permettant d'envoyer une notification
 // Dès que quelqu'un reçoit un message.

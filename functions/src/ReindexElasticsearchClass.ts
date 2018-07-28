@@ -139,7 +139,7 @@ export default class ReindexElasticsearchClass {
         console.log('Indexing annonce ', annonceId, annonce);
         const elasticsearchRequest = {
             method: 'POST',
-            uri: elasticSearchConfig.url + '/' + elasticIndexName + '/annonce/' + annonceId,
+            uri: elasticSearchConfig.url + elasticIndexName + '/annonce/' + annonceId,
             auth: {
                 username: elasticSearchConfig.username,
                 password: elasticSearchConfig.password,
@@ -151,6 +151,7 @@ export default class ReindexElasticsearchClass {
     };
 
     private static deleteIndex(): Promise<any> {
+        console.log('Call method deleteIndex');
         const deleteAnnoncesIndex = {
             method: 'DELETE',
             uri: elasticSearchConfig.url + elasticIndexName,
@@ -163,7 +164,11 @@ export default class ReindexElasticsearchClass {
     }
 
     private static createIndex(): Promise<any> {
+        console.log('Call method createIndex');
         const createAnnoncesIndex = {
+            headers: {
+                'Content-Type': 'application/json'
+            },
             method: 'PUT',
             uri: elasticSearchConfig.url + elasticIndexName,
             auth: {
@@ -175,23 +180,29 @@ export default class ReindexElasticsearchClass {
         return request(createAnnoncesIndex);
     }
 
+    // TODO méthode pas encore totalement opérationnelle
     private static listAnnonceToIndex(): Promise<any> {
+        console.log('Call method listAnnonceToIndex');
         return db.ref('/annonces').once('value').then((snapshotListAnnonces) => {
-            const listAnnonce = snapshotListAnnonces.val();
             const listPromiseIndex = [];
-            for (const annonce of listAnnonce) {
-                listPromiseIndex.push(ReindexElasticsearchClass.indexation(annonce));
-            }
+            snapshotListAnnonces.forEach(annonceSnapshot =>{
+                listPromiseIndex.push(ReindexElasticsearchClass.indexation(annonceSnapshot.val()));
+                return true;
+            });
             return Promise.all(listPromiseIndex);
         });
     }
 
-    private static async createAndReindex() {
-        await ReindexElasticsearchClass.createIndex();
-        await ReindexElasticsearchClass.listAnnonceToIndex();
+    private static createAndReindex(): Promise<any> {
+        console.log('Call method createAndReindex');
+        return ReindexElasticsearchClass.createIndex()
+            .then(value => {
+                return ReindexElasticsearchClass.listAnnonceToIndex();
+            })
+            .catch(reason => console.log(reason));
     }
 
-    public static reindexElasticsearchHttpsFunction: HttpsFunction = functions.https.onRequest((req, res) => {
+    public static reindexElasticsearchHttpsFunction: HttpsFunction = functions.https.onRequest(async (req, res) => {
         if (req.method !== 'POST') {
             res.status(405).send('Méthode non autorisée');
             return null;
@@ -202,26 +213,19 @@ export default class ReindexElasticsearchClass {
             return null;
         }
 
-        ReindexElasticsearchClass.deleteIndex()
+        await ReindexElasticsearchClass.deleteIndex()
             .then((response) => {
-                ReindexElasticsearchClass.createAndReindex()
-                    .then(value => res.status(200).send())
-                    .catch(reason => {
-                        console.error(reason);
-                        res.status(500).send();
-                    });
+                console.log('Delete the index successfully');
             })
             .catch((reason) => {
-                if (reason.error.status === 404) {
-                    ReindexElasticsearchClass.createAndReindex()
-                        .then(value => res.status(200).send())
-                        .catch(reason1 => {
-                            console.error(reason1);
-                            res.status(500).send();
-                        });
-                } else {
-                    console.error(reason);
-                }
-            })
+                console.error(reason);
+            });
+
+        ReindexElasticsearchClass.createAndReindex()
+            .then(value => res.status(200).send())
+            .catch(reason => {
+                console.error(reason);
+                res.status(500).send();
+            });
     })
 }
