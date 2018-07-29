@@ -8,7 +8,7 @@ try {
 }
 const request = require('request-promise');
 const db = admin.database();
-const elasticIndexName: string = 'biloutes';
+const elasticIndexName: string = 'annonces';
 const elasticSearchConfig = functions.config().elasticsearch;
 const mappings = {
     "settings": {
@@ -183,11 +183,11 @@ export default class ReindexElasticsearchClass {
     // TODO méthode pas encore totalement opérationnelle
     private static listAnnonceToIndex(): Promise<any> {
         console.log('Call method listAnnonceToIndex');
-        return db.ref('/annonces').once('value').then((snapshotListAnnonces) => {
+        return db.ref('/annonces').once('value', snapshotListAnnonces => {
             const listPromiseIndex = [];
-            snapshotListAnnonces.forEach(annonceSnapshot =>{
+            snapshotListAnnonces.forEach(annonceSnapshot => {
                 listPromiseIndex.push(ReindexElasticsearchClass.indexation(annonceSnapshot.val()));
-                return true;
+                return false;
             });
             return Promise.all(listPromiseIndex);
         });
