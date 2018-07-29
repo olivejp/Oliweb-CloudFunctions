@@ -180,7 +180,6 @@ export default class ReindexElasticsearchClass {
         return request(createAnnoncesIndex);
     }
 
-    // TODO méthode pas encore totalement opérationnelle
     private static listAnnonceToIndex(): Promise<any> {
         console.log('Call method listAnnonceToIndex');
         return db.ref('/annonces').once('value', snapshotListAnnonces => {
