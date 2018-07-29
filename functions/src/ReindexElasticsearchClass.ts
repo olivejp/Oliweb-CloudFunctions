@@ -8,7 +8,7 @@ try {
 }
 const request = require('request-promise');
 const db = admin.database();
-const elasticIndexName: string = 'biloutes';
+const elasticIndexName: string = 'annonces';
 const elasticSearchConfig = functions.config().elasticsearch;
 const mappings = {
     "settings": {
@@ -136,11 +136,10 @@ export default class ReindexElasticsearchClass {
 
     private static indexation(annonce: any): Promise<any> {
         const annonceId = annonce.uuid;
-
         console.log('Indexing annonce ', annonceId, annonce);
         const elasticsearchRequest = {
             method: 'POST',
-            uri: elasticSearchConfig.url + '/' + elasticIndexName + '/annonce/' + annonceId,
+            uri: elasticSearchConfig.url + elasticIndexName + '/annonce/' + annonceId,
             auth: {
                 username: elasticSearchConfig.username,
                 password: elasticSearchConfig.password,
@@ -148,77 +147,84 @@ export default class ReindexElasticsearchClass {
             body: annonce,
             json: true
         };
-
         return request(elasticsearchRequest);
     };
 
-    public static reindexElasticsearchHttpsFunction: HttpsFunction = functions.https.onRequest((req, res) => {
-        return new Promise((resolve, reject) => {
-            if (req.method !== 'POST') {
-                res.status(405).send('Méthode non autorisée');
-                reject('Méthode non autorisée');
-                return null;
+    private static deleteIndex(): Promise<any> {
+        console.log('Call method deleteIndex');
+        const deleteAnnoncesIndex = {
+            method: 'DELETE',
+            uri: elasticSearchConfig.url + elasticIndexName,
+            auth: {
+                username: elasticSearchConfig.username,
+                password: elasticSearchConfig.password,
             }
+        };
+        return request(deleteAnnoncesIndex);
+    }
 
-            if (req.get('user') !== functions.config().reindex.user || req.get('password') !== functions.config().reindex.password) {
-                res.status(403).send('Utilisateur non autorisé');
-                reject('Utilisateur non autorisé');
-                return null;
-            }
+    private static createIndex(): Promise<any> {
+        console.log('Call method createIndex');
+        const createAnnoncesIndex = {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'PUT',
+            uri: elasticSearchConfig.url + elasticIndexName,
+            auth: {
+                username: elasticSearchConfig.username,
+                password: elasticSearchConfig.password,
+            },
+            body: JSON.stringify(mappings)
+        };
+        return request(createAnnoncesIndex);
+    }
 
-            function createIndex() {
-                const createAnnoncesIndex = {
-                    method: 'PUT',
-                    uri: elasticSearchConfig.url + elasticIndexName,
-                    auth: {
-                        username: elasticSearchConfig.username,
-                        password: elasticSearchConfig.password,
-                    },
-                    body: JSON.stringify(mappings)
-                };
-
-                // Création de notre nouvel index
-                request(createAnnoncesIndex)
-                    .then((value) => {
-                        // Lecture de toutes les annonces
-                        db.ref('/annonces').once('value')
-                            .then((listAnnonces) => {
-                                console.log('Liste des annonces à réindexer : ' + listAnnonces.val());
-
-                                // Pour chaque annonce, j'indexe dans ES
-                                for (const annonces of listAnnonces) {
-                                    ReindexElasticsearchClass.indexation(annonces)
-                                        .then(indexationResponse => console.log('Elasticsearch response', indexationResponse))
-                                        .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
-                                }
-                            })
-                            .catch((reason) => console.error(new Error(reason)));
-                    })
-                    .catch((reason) => console.error('Création de l\'index ' + elasticIndexName + ' échouée : ' + reason.message));
-            }
-
-            // Suppression de l'index
-            const deleteAnnoncesIndex = {
-                method: 'DELETE',
-                uri: elasticSearchConfig.url + elasticIndexName,
-                auth: {
-                    username: elasticSearchConfig.username,
-                    password: elasticSearchConfig.password,
-                }
-            };
-            request(deleteAnnoncesIndex)
-                .then(response => {
-                    console.log('Suppression de l\'index ' + elasticIndexName + ' réussi', response);
-                    createIndex();
-                })
-                .catch(reason => {
-                    if (reason.error.status === 404) {
-                        createIndex();
-                    } else {
-                        console.error('Suppression de l\'index ' + elasticIndexName + ' échouée : ' + reason.message);
-                    }
-                });
+    private static listAnnonceToIndex(): Promise<any> {
+        console.log('Call method listAnnonceToIndex');
+        return db.ref('/annonces').once('value', snapshotListAnnonces => {
+            const listPromiseIndex = [];
+            snapshotListAnnonces.forEach(annonceSnapshot => {
+                listPromiseIndex.push(ReindexElasticsearchClass.indexation(annonceSnapshot.val()));
+                return false;
+            });
+            return Promise.all(listPromiseIndex);
         });
-    })
+    }
 
+    private static createAndReindex(): Promise<any> {
+        console.log('Call method createAndReindex');
+        return ReindexElasticsearchClass.createIndex()
+            .then(value => {
+                return ReindexElasticsearchClass.listAnnonceToIndex();
+            })
+            .catch(reason => console.log(reason));
+    }
+
+    public static reindexElasticsearchHttpsFunction: HttpsFunction = functions.https.onRequest(async (req, res) => {
+        if (req.method !== 'POST') {
+            res.status(405).send('Méthode non autorisée');
+            return null;
+        }
+
+        if (req.get('user') !== functions.config().reindex.user || req.get('password') !== functions.config().reindex.password) {
+            res.status(403).send('Utilisateur non autorisé');
+            return null;
+        }
+
+        await ReindexElasticsearchClass.deleteIndex()
+            .then((response) => {
+                console.log('Delete the index successfully');
+            })
+            .catch((reason) => {
+                console.error(reason);
+            });
+
+        ReindexElasticsearchClass.createAndReindex()
+            .then(value => res.status(200).send())
+            .catch(reason => {
+                console.error(reason);
+                res.status(500).send();
+            });
+    })
 }
