@@ -24,7 +24,7 @@ export default class NotificationMessageClass {
         const promiseArray: Array<Promise<string>> = [];
         for (const userId of usersIds) {
             const promesse: Promise<string> = new Promise<string>((resolve, reject) => {
-                db.ref('/users/${userId}').once('value')
+                db.ref('/users/' + userId).once('value')
                     .then(snapshotUser => {
                         const user = snapshotUser.val();
                         resolve(user.tokenDevice);
@@ -70,7 +70,7 @@ export default class NotificationMessageClass {
             const authorId = messageData.uidAuthor;
 
             // Récupération du chat
-            return db.ref('/chats/${chatId}').once('value')
+            return db.ref('/chats/' + chatId).once('value')
                 .then(snapshotChat => {
 
                     // Récupération du tableau des membres participants au chat (tous sauf l'auteur)
