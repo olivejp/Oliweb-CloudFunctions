@@ -85,7 +85,7 @@ export default class NotificationMessageClass {
                     // Récupération du token dans les paramètres des utilisateurs
                     return NotificationMessageClass.getTokens(receiverIds)
                         .then(tokens => {
-                            return NotificationMessageClass.sendNotification(tokens, chatData.titreAnnonce, messageData)
+                            return NotificationMessageClass.sendNotification(tokens, chatData.titreAnnonce, messageData.message)
                                 .then(value => console.log('Messages correctement envoyés'));
                         });
                 });
