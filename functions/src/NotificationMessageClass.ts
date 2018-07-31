@@ -1,9 +1,9 @@
+import * as admin from "firebase-admin";
 import DataSnapshot = admin.database.DataSnapshot;
 import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
 
 const functions = require('firebase-functions');
 import {CloudFunction} from "firebase-functions";
-import * as admin from "firebase-admin";
 
 try {
     admin.initializeApp(functions.config().firebase);
