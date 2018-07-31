@@ -1,3 +1,6 @@
+import DataSnapshot = admin.database.DataSnapshot;
+import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
+
 const functions = require('firebase-functions');
 import {CloudFunction} from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -6,8 +9,7 @@ try {
     admin.initializeApp(functions.config().firebase);
 } catch (e) {
 }
-import DataSnapshot = admin.database.DataSnapshot;
-import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
+
 
 const db = admin.database();
 
@@ -40,17 +42,21 @@ export default class NotificationMessageClass {
     };
 
     /**
-     *
-     * @param {string[]} tokens
-     * @param {string} annonceTitre
-     * @param {string} message
-     * @returns {Promise<MessagingDevicesResponse>}
+     * @param tokens
+     * @param chatUid
+     * @param annonceTitre
+     * @param message
      */
-    private static sendNotification(tokens: string[], annonceTitre: string, message: string): Promise<MessagingDevicesResponse> {
+    private static sendNotification(tokens: string[], chatUid: string, annonceTitre: string, message: string): Promise<MessagingDevicesResponse> {
         const payload = {
+            data: {
+                KEY_CHAT_ORIGIN: 'true',
+                KEY_CHAT_UID: chatUid
+            },
             notification: {
                 title: annonceTitre,
-                body: message
+                body: message,
+                tag: chatUid
             }
         };
         return admin.messaging().sendToDevice(tokens, payload);
@@ -85,7 +91,7 @@ export default class NotificationMessageClass {
                     // Récupération du token dans les paramètres des utilisateurs
                     return NotificationMessageClass.getTokens(receiverIds)
                         .then(tokens => {
-                            return NotificationMessageClass.sendNotification(tokens, chatData.titreAnnonce, messageData.message)
+                            return NotificationMessageClass.sendNotification(tokens, chatId, chatData.titreAnnonce, messageData.message)
                                 .then(value => console.log('Messages correctement envoyés'));
                         });
                 });

@@ -13,7 +13,7 @@
   "dependencies": {
     "elasticsearch": "^14.1.0",
     "firebase-admin": "^5.13.1",
-    "firebase-functions": "^2.0.1",
+    "firebase-functions": "^2.0.2",
     "lodash": "^4.17.5",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
