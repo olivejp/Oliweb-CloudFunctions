@@ -42,16 +42,21 @@ export default class NotificationMessageClass {
     };
 
     /**
+     *
      * @param tokens
      * @param chatUid
      * @param annonceTitre
      * @param message
+     * @param author
+     * @param receiverUid
      */
-    private static sendNotification(tokens: string[], chatUid: string, annonceTitre: string, message: string): Promise<MessagingDevicesResponse> {
+    private static sendNotification(tokens: string[], chatUid: string, annonceTitre: string, message: string, author: any, receiverUid: string[]): Promise<MessagingDevicesResponse> {
         const payload = {
             data: {
+                KEY_CHAT_RECEIVER: receiverUid[0],
                 KEY_CHAT_ORIGIN: 'true',
-                KEY_CHAT_UID: chatUid
+                KEY_CHAT_UID: chatUid,
+                KEY_CHAT_AUTHOR: JSON.stringify(author)
             },
             notification: {
                 title: annonceTitre,
@@ -72,28 +77,44 @@ export default class NotificationMessageClass {
             // Récupération de la requête et de son Id
             const messageData = snapshot.val();
             const chatId = context.params.chatId;
-            const messageId = context.params.messageId;
             const authorId = messageData.uidAuthor;
 
             // Récupération du chat
             return db.ref('/chats/' + chatId).once('value')
-                .then(snapshotChat => {
+                .then(async (snapshotChat) => {
 
                     // Récupération du tableau des membres participants au chat (tous sauf l'auteur)
-                    const receiverIds = [];
+                    const receiverId = [];
                     const chatData = snapshotChat.val();
                     Object.keys(chatData.members).forEach(key => {
                         if (chatData.members[key] === true && key !== authorId) {
-                            receiverIds.push(key);
+                            receiverId.push(key);
                         }
                     });
 
-                    // Récupération du token dans les paramètres des utilisateurs
-                    return NotificationMessageClass.getTokens(receiverIds)
-                        .then(tokens => {
-                            return NotificationMessageClass.sendNotification(tokens, chatId, chatData.titreAnnonce, messageData.message)
-                                .then(value => console.log('Messages correctement envoyés'));
-                        });
+                    // Récupération de l'auteur
+                    try {
+                        const snapshotAuthor = await db.ref('/users/' + authorId).once('value');
+
+                        console.log('Author informations : ' + JSON.stringify(snapshotAuthor));
+
+                        // Récupération du token dans les paramètres des utilisateurs
+                        return NotificationMessageClass.getTokens(receiverId)
+                            .then(tokens => {
+                                if (tokens != null && tokens.length > 0) {
+                                    console.log('All tokens received : ' + tokens.toString());
+                                    return NotificationMessageClass.sendNotification(tokens, chatId, chatData.titreAnnonce, messageData.message, snapshotAuthor, receiverId)
+                                        .then(value => console.log('Messages correctement envoyés'))
+                                        .catch(reason => console.error(reason));
+                                } else {
+                                    console.log('No tokens');
+                                    return null;
+                                }
+                            })
+                            .catch(reason => console.error(reason));
+                    } catch (e) {
+                        console.error(e);
+                    }
                 });
         });
 }
