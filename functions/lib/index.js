@@ -6,6 +6,7 @@ const ObserveOnRequestClass_1 = require("./ObserveOnRequestClass");
 const DeleteOutdatedRequestsClass_1 = require("./DeleteOutdatedRequestsClass");
 const ReindexElasticsearchClass_1 = require("./ReindexElasticsearchClass");
 const NotificationMessageClass_1 = require("./NotificationMessageClass");
+const DeleteMessageWhenChatDeletedClass_1 = require("./DeleteMessageWhenChatDeletedClass");
 const functions = require('firebase-functions');
 try {
     admin.initializeApp(functions.config().firebase);
@@ -28,4 +29,6 @@ exports.reindexElasticsearch = ReindexElasticsearchClass_1.default.reindexElasti
 exports.observeRequest = ObserveOnRequestClass_1.default.observeOnRequestCloudFunction;
 // Cloud function qui sera appelée toutes les 5 minutes pour supprimer les requests qui ont plus de 1 minutes
 exports.deleteOutdatedRequests = DeleteOutdatedRequestsClass_1.default.deleteOutdatedRequestsCloudFunction;
+// Cloud function qui permet d'écouter tous les chats supprimés et de supprimer les messages correspondants
+exports.deleteMessageWhenChatDeleted = DeleteMessageWhenChatDeletedClass_1.default.deleteMessageWhenChatDeletedClassCloudFunction;
 //# sourceMappingURL=index.js.map

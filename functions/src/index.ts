@@ -4,6 +4,7 @@ import {default as ObserveOnRequestClass} from "./ObserveOnRequestClass";
 import DeleteOutdatedRequestsClass from "./DeleteOutdatedRequestsClass";
 import ReindexElasticsearchClass from "./ReindexElasticsearchClass";
 import NotificationMessageClass from "./NotificationMessageClass";
+import DeleteMessageWhenChatDeletedClass from "./DeleteMessageWhenChatDeletedClass";
 
 const functions = require('firebase-functions');
 try {
@@ -31,3 +32,6 @@ exports.observeRequest = ObserveOnRequestClass.observeOnRequestCloudFunction;
 
 // Cloud function qui sera appelée toutes les 5 minutes pour supprimer les requests qui ont plus de 1 minutes
 exports.deleteOutdatedRequests = DeleteOutdatedRequestsClass.deleteOutdatedRequestsCloudFunction;
+
+// Cloud function qui permet d'écouter tous les chats supprimés et de supprimer les messages correspondants
+exports.deleteMessageWhenChatDeleted = DeleteMessageWhenChatDeletedClass.deleteMessageWhenChatDeletedClassCloudFunction;

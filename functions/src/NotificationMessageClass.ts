@@ -101,7 +101,7 @@ export default class NotificationMessageClass {
                         // Récupération du token dans les paramètres des utilisateurs
                         return NotificationMessageClass.getTokens(receiverId)
                             .then(tokens => {
-                                if (tokens != null && tokens.length > 0) {
+                                if (tokens !== null && tokens.length > 0) {
                                     console.log('All tokens received : ' + tokens.toString());
                                     return NotificationMessageClass.sendNotification(tokens, chatId, chatData.titreAnnonce, messageData.message, snapshotAuthor, receiverId)
                                         .then(value => console.log('Messages correctement envoyés'))
