@@ -5,6 +5,7 @@ import DeleteOutdatedRequestsClass from "./DeleteOutdatedRequestsClass";
 import ReindexElasticsearchClass from "./ReindexElasticsearchClass";
 import NotificationMessageClass from "./NotificationMessageClass";
 import DeleteMessageWhenChatDeletedClass from "./DeleteMessageWhenChatDeletedClass";
+import CreateThumbnailClass from "./CreateThumbnailClass";
 
 const functions = require('firebase-functions');
 try {
@@ -35,3 +36,6 @@ exports.deleteOutdatedRequests = DeleteOutdatedRequestsClass.deleteOutdatedReque
 
 // Cloud function qui permet d'écouter tous les chats supprimés et de supprimer les messages correspondants
 exports.deleteMessageWhenChatDeleted = DeleteMessageWhenChatDeletedClass.deleteMessageWhenChatDeletedClassCloudFunction;
+
+// Cloud function qui permet de créer des thumbnails de toutes les photos envoyées sur le storage
+exports.createThumbnail = CreateThumbnailClass.createThumbnailFunction;
