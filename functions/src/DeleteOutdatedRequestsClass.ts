@@ -14,11 +14,12 @@ export default class DeleteOutdatedRequestsClass {
 
     private static getPromises(tabRequest: DataSnapshot, timestampServer: number): Array<Promise<any>> {
         const promisesResult = [];
+
         tabRequest.forEach(request => {
             if (timestampServer > Number(request.child('timestamp').val()) + 60 * 1000) {
                 promisesResult.push(request.ref.remove());
             }
-            return true;
+            return false;
         });
         return promisesResult;
     }
@@ -32,7 +33,7 @@ export default class DeleteOutdatedRequestsClass {
                 const listRequests = await db.ref('/requests/').once('value');
 
                 // Parcourt de la liste des requêtes pour savoir celles qui sont à supprimer
-                const listPromisesRequestToDelete = DeleteOutdatedRequestsClass.getPromises(listRequests, serverTimestamp);
+                const listPromisesRequestToDelete: Array<Promise<any>> = DeleteOutdatedRequestsClass.getPromises(listRequests, serverTimestamp);
 
                 Promise.all(listPromisesRequestToDelete)
                     .then(value => {
