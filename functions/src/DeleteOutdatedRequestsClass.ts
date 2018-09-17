@@ -32,7 +32,7 @@ export default class DeleteOutdatedRequestsClass {
                 // Liste toutes les requêtes rangées par timestamp
                 const listRequests = await db.ref('/requests/').once('value');
 
-                // Parcourt de la liste des requêtes pour savoir celles qui sont à supprimer
+                // Parcourt de la liste des requêtes pour collecter celles qui sont à supprimer
                 const listPromisesRequestToDelete: Array<Promise<any>> = DeleteOutdatedRequestsClass.getPromises(listRequests, serverTimestamp);
 
                 Promise.all(listPromisesRequestToDelete)
