@@ -13,7 +13,6 @@ try {
 } catch (e) {
 }
 
-// TODO Tester cette function
 // Cloud function permettant d'envoyer une notification
 // Dès que quelqu'un reçoit un message.
 exports.sendMessageNotification = NotificationMessageClass.notificationMessageCloudFunction;
@@ -38,4 +37,4 @@ exports.deleteOutdatedRequests = DeleteOutdatedRequestsClass.deleteOutdatedReque
 exports.deleteMessageWhenChatDeleted = DeleteMessageWhenChatDeletedClass.deleteMessageWhenChatDeletedClassCloudFunction;
 
 // Cloud function qui permet de créer des thumbnails de toutes les photos envoyées sur le storage
-exports.createThumbnail = CreateThumbnailClass.createThumbnailFunction;
+// exports.createThumbnail = CreateThumbnailClass.createThumbnailFunction;
