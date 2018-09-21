@@ -14,22 +14,6 @@ const elasticSearchConfig = functions.config().elasticsearch;
 
 export default class ObserveOnRequestClass {
 
-    // On envoie pas le timestamp à Elasticsearch, car cette donnée n'est utilisée que pour voir quand la request a été créé
-    private static deleteTimestamp(req: any): any {
-        if (!isUndefined(req.timestamp)) {
-            delete req['timestamp'];
-        }
-    }
-
-    // Lorsque l'on fait un tri sur le titre, il faut remplacer titre par titre.keyword pour qu'Elasticsearch fasse la bonne requête.
-    private static changeToKeywordTitre(req: any): any {
-        let jsonSortString = JSON.stringify(req.sort);
-        if (jsonSortString.includes("titre")) {
-            jsonSortString = jsonSortString.replace("titre", "titre.keyword");
-            req.sort = JSON.parse(jsonSortString);
-        }
-    }
-
     private static async callElasticsearch(elasticsearchRequest: any, snapshot: any) {
         return request(elasticsearchRequest)
             .then(resp => {
@@ -58,9 +42,6 @@ export default class ObserveOnRequestClass {
                 return true;
             }
 
-            ObserveOnRequestClass.deleteTimestamp(requestData);
-            ObserveOnRequestClass.changeToKeywordTitre(requestData);
-
             // Construction de la requête ES
             const elasticsearchRequest = {
                 method: 'POST',
@@ -69,7 +50,7 @@ export default class ObserveOnRequestClass {
                     username: elasticSearchConfig.username,
                     password: elasticSearchConfig.password,
                 },
-                body: requestData,
+                body: JSON.parse(requestData.request),
                 json: true
             };
 
