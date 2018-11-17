@@ -14,21 +14,36 @@ const elasticSearchConfig = functions.config().elasticsearch;
 
 export default class ObserveOnRequestClass {
 
-    private static async callElasticsearch(elasticsearchRequest: any, snapshot: any) {
+    private static async callElasticsearch(elasticsearchRequest: any, snapshot: any, requestData: any) {
         return request(elasticsearchRequest)
             .then(resp => {
                 // Récupération du résultat et écriture dans notre FirebaseDatabase
-                const hits = resp.hits.hits;
                 console.log("Response", resp);
 
-                if (!isUndefined(resp.hits.hits) && (resp.hits.hits.length > 0)) {
-                    snapshot.ref.child('results').set(hits)
-                        .then(value => console.log('Insertion réussie'))
-                        .catch(a => console.error('Insertion dans results échouée : ' + a.message));
+                // Dans le cas d'une requête en version 2, on va renvoyer tout l'élément resp.hits
+                if (isUndefined(requestData.version) && requestData.version === 2) {
+                    if (isUndefined(resp.hits)) {
+                        snapshot.ref.child('no_results').set(true)
+                            .then(value => console.log('Insertion réussie : aucun élément trouvé'))
+                            .catch(a => console.error('Insertion dans results échouée : ' + a.message));
+                    } else {
+                        const superHits = resp.hits;
+                        snapshot.ref.child('results').set(superHits)
+                            .then(value => console.log('Insertion réussie'))
+                            .catch(a => console.error('Insertion dans results échouée : ' + a.message));
+                    }
                 } else {
-                    snapshot.ref.child('no_results').set(true)
-                        .then(value => console.log('Insertion réussie : aucun élément trouvé'))
-                        .catch(a => console.error('Insertion dans results échouée : ' + a.message));
+                    // Dans le cas de la version 1 on renvoie uniquement le sous objet resp.hits.hits
+                    const hits = resp.hits.hits;
+                    if (!isUndefined(resp.hits.hits) && (resp.hits.hits.length > 0)) {
+                        snapshot.ref.child('results').set(hits)
+                            .then(value => console.log('Insertion réussie'))
+                            .catch(a => console.error('Insertion dans results échouée : ' + a.message));
+                    } else {
+                        snapshot.ref.child('no_results').set(true)
+                            .then(value => console.log('Insertion réussie : aucun élément trouvé'))
+                            .catch(a => console.error('Insertion dans results échouée : ' + a.message));
+                    }
                 }
             })
             .catch(reason => console.error('Houla ca va pas du tout la !' + reason.message));
@@ -37,7 +52,7 @@ export default class ObserveOnRequestClass {
     public static observeOnRequestCloudFunction: CloudFunction<DataSnapshot> = functions.database.ref('/requests/{requestId}/').onCreate((snapshot) => {
             const requestData = snapshot.val();
 
-            // We want avoid infinite loop, so we continue only if requestData !== null && results has not been set already.
+            // We want avoid infinite loop, so we continue only if requestData !== null && results has not been already set.
             if (!requestData || !isUndefined(requestData.results) || !isUndefined(requestData.no_results)) {
                 return true;
             }
@@ -55,7 +70,7 @@ export default class ObserveOnRequestClass {
             };
 
             // Lancement de la recherche
-            return ObserveOnRequestClass.callElasticsearch(elasticsearchRequest, snapshot);
+            return ObserveOnRequestClass.callElasticsearch(elasticsearchRequest, snapshot, requestData);
         }
     );
 }
