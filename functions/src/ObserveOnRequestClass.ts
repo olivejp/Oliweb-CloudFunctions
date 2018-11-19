@@ -21,7 +21,7 @@ export default class ObserveOnRequestClass {
                 console.log("Response", resp);
 
                 // Dans le cas d'une requête en version 2, on va renvoyer tout l'élément resp.hits
-                if (isUndefined(requestData.version) && requestData.version === 2) {
+                if (!isUndefined(requestData.version) && requestData.version === 2) {
                     if (isUndefined(resp.hits)) {
                         snapshot.ref.child('no_results').set(true)
                             .then(value => console.log('Insertion réussie : aucun élément trouvé'))
