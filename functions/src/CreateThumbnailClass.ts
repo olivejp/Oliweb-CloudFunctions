@@ -76,7 +76,7 @@ export default class CreateThumbnailClass {
                 const thumbFileUrl = thumbResult[0];
                 const fileUrl = originalResult[0];
                 // Add the URLs to the Database
-                await admin.database().ref('images').push({path: fileUrl, thumbnail: thumbFileUrl});
+                await admin.database().ref('images').push({filename: fileName, thumbnail: thumbFileUrl});
                 console.log('Thumbnail URLs saved to database.');
             } else {
                 console.error('Préfix thumbnail trouvé dans le nom de l\'image');
