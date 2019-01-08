@@ -1,0 +1,14 @@
+https://firebase.google.com/docs/functions/get-started
+
+// Pour déployer les functions
+firebase deploy --only functions
+
+// Pour voir les variables d'env. de firebase
+firebase functions:config:get
+
+// Pour modifier une variable d'env.
+firebase functions:config:set someservice.key="THE API KEY"
+
+// Pour réindexer Elasticsearch
+// Appeler la méthode POST sur l'URL suivante et passer les headers user et password avec les bonnes valeurs.
+https://us-central1-oliweb-ec245.cloudfunctions.net/reindexElasticsearch
