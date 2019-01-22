@@ -24,7 +24,7 @@ exports.reindexElasticsearch = ReindexElasticsearchClass_1.default.reindexElasti
 // Observe /requests childs on Firebase Database.
 // Call ElasticSearch with the query parameters and write the result from ES to /requests/{requestId}/results in Firebase Database
 // Or set /requests/{requestId}/no_results = true if no result is return by Elasticsearch
-// This way the mobile application never talk to ES directly
+// This way the mobile application never talks to ES directly
 exports.observeRequest = ObserveOnRequestClass_1.default.observeOnRequestCloudFunction;
 // Cloud function qui sera appelée toutes les 5 minutes pour supprimer les requests qui ont plus de 1 minutes
 exports.deleteOutdatedRequests = DeleteOutdatedRequestsClass_1.default.deleteOutdatedRequestsCloudFunction;

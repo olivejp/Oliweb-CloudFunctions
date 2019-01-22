@@ -4,6 +4,7 @@ import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
 
 const functions = require('firebase-functions');
 import {CloudFunction} from "firebase-functions";
+import {sendNotification} from "./Utility";
 
 try {
     admin.initializeApp(functions.config().firebase);
@@ -43,29 +44,24 @@ export default class NotificationMessageClass {
 
     /**
      *
-     * @param tokens
-     * @param chatUid
-     * @param annonceTitre
-     * @param message
-     * @param author
-     * @param receiverUid
+     * @param tokens[] : string[] = tableau contenant les tokens des utilisateurs receveurs
+     * @param chatUid : string = Uid du chat d'origine
+     * @param annonceTitre :string = Titre de l'annonce
+     * @param message : string = Message à envoyer
+     * @param author : any = Objet contenant les informations de l'auteur
+     * @param receiverUid : string = Uid du receveur
      */
-    private static sendNotification(tokens: string[], chatUid: string, annonceTitre: string, message: string, author: any, receiverUid: string[]): Promise<MessagingDevicesResponse> {
-        const payload = {
-            data: {
-                KEY_CHAT_RECEIVER: receiverUid[0],
-                KEY_CHAT_ORIGIN: 'true',
-                KEY_CHAT_UID: chatUid,
-                KEY_CHAT_AUTHOR: JSON.stringify(author)
-            },
-            notification: {
-                title: annonceTitre,
-                body: message,
-                tag: chatUid
-            }
+    private static sendResponseToChat(tokens: string[], chatUid: string, annonceTitre: string, message: string, author: any, receiverUid: string[]): Promise<MessagingDevicesResponse> {
+        const data = {
+            KEY_CHAT_RECEIVER: receiverUid[0],
+            KEY_CHAT_ORIGIN: 'true',
+            KEY_CHAT_UID: chatUid,
+            KEY_CHAT_AUTHOR: JSON.stringify(author)
         };
-        return admin.messaging().sendToDevice(tokens, payload);
+        return sendNotification(tokens, annonceTitre, message, chatUid, data);
     }
+
+
 
     /**
      *
@@ -103,7 +99,7 @@ export default class NotificationMessageClass {
                             .then(tokens => {
                                 if (tokens !== null && tokens.length > 0) {
                                     console.log('All tokens received : ' + tokens.toString());
-                                    return NotificationMessageClass.sendNotification(tokens, chatId, chatData.titreAnnonce, messageData.message, snapshotAuthor, receiverId)
+                                    return NotificationMessageClass.sendResponseToChat(tokens, chatId, chatData.titreAnnonce, messageData.message, snapshotAuthor, receiverId)
                                         .then(value => console.log('Messages correctement envoyés'))
                                         .catch(reason => console.error(reason));
                                 } else {
