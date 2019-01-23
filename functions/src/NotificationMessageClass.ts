@@ -4,7 +4,7 @@ import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
 
 const functions = require('firebase-functions');
 import {CloudFunction} from "firebase-functions";
-import {sendNotification} from "./Utility";
+import {getTokens, sendNotification} from "./Utility";
 
 try {
     admin.initializeApp(functions.config().firebase);
@@ -15,32 +15,6 @@ try {
 const db = admin.database();
 
 export default class NotificationMessageClass {
-
-    /**
-     * Va lire dans Firebase database la liste des ids utilisateur et va récupérer pour chacun d'eux son tokenDevice.
-     * Renverra une promesse avec un tableau contenant tous les tokens des utilisateurs
-     *
-     * @param usersIds : Liste des ids des utilisateurs dont on veut les tokens
-     * @returns {Promise<string[]>} Promesse contenant le tableau des tokens
-     */
-    private static getTokens(usersIds): Promise<string[]> {
-        const promiseArray: Array<Promise<string>> = [];
-        for (const userId of usersIds) {
-            const promesse: Promise<string> = new Promise<string>((resolve, reject) => {
-                db.ref('/users/' + userId).once('value')
-                    .then(snapshotUser => {
-                        const user = snapshotUser.val();
-                        resolve(user.tokenDevice);
-                    })
-                    .catch(reason => {
-                        console.error(new Error(reason));
-                        reject(reason);
-                    });
-            });
-            promiseArray.push(promesse);
-        }
-        return Promise.all(promiseArray);
-    };
 
     /**
      *
@@ -95,7 +69,7 @@ export default class NotificationMessageClass {
                         console.log('Author informations : ' + JSON.stringify(snapshotAuthor));
 
                         // Récupération du token dans les paramètres des utilisateurs
-                        return NotificationMessageClass.getTokens(receiverId)
+                        return getTokens(receiverId)
                             .then(tokens => {
                                 if (tokens !== null && tokens.length > 0) {
                                     console.log('All tokens received : ' + tokens.toString());
