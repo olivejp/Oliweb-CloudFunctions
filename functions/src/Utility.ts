@@ -10,18 +10,36 @@ try {
 }
 const db = admin.database();
 
+export const DOMAIN_CLOUD_FUNCTION: string = 'cloudfunctions';
+
+export const PARAM_SANS_PHOTO_NB_JOUR_AV_RELANCE: string = 'sans_photo_nb_jour_avant_relance';
+export const PARAM_SANS_PHOTO_NB_JOUR_AP_RELANCE: string = 'sans_photo_nb_jour_apres_relance';
+
 export function daysInMilliseconds(days: number): number {
     const nb_milliseconds_in_one_day = 86400000;
     return days * nb_milliseconds_in_one_day;
 }
 
-export function getServerTimestamp(): Promise<number> {
+export function getParams(domain: string, key: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        db.ref('timestamp').child('now').set(ServerValue.TIMESTAMP, function (error) {
+        db.ref('params').child(domain).child(key).once('value').then(
+            (data) => {
+                resolve(data.val());
+            }, (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
+export function getServerTimestamp(): Promise<number> {
+    const nowReference = db.ref('timestamp').child('now');
+    return new Promise((resolve, reject) => {
+        nowReference.set(ServerValue.TIMESTAMP, function (error) {
             if (error) {
                 reject(error);
             } else {
-                db.ref('timestamp').child('now').once('value').then(
+                nowReference.once('value').then(
                     (data) => {
                         resolve(data.val());
                     }, (error1) => {
