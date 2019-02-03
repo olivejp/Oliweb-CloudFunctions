@@ -1,6 +1,6 @@
 import {CloudFunction} from "firebase-functions";
 import * as admin from "firebase-admin";
-import * as request from "request-promise";
+import DataSnapshot = admin.database.DataSnapshot;
 
 const functions = require('firebase-functions');
 
@@ -8,7 +8,6 @@ try {
     admin.initializeApp(functions.config().firebase);
 } catch (e) {
 }
-import DataSnapshot = admin.database.DataSnapshot;
 
 export default class CreateThumbnail2ClassClass {
     public static createThumbnailCloudFunction: CloudFunction<DataSnapshot> = functions.database.ref('/annonces/{annonceId}/photos/{photoId}')

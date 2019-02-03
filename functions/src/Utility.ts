@@ -1,8 +1,9 @@
+import * as admin from "firebase-admin";
 import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
 import ServerValue = admin.database.ServerValue;
 
 const functions = require('firebase-functions');
-import * as admin from "firebase-admin";
+
 
 try {
     admin.initializeApp(functions.config().firebase);
