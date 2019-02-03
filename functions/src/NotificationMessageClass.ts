@@ -4,6 +4,7 @@ import MessagingDevicesResponse = admin.messaging.MessagingDevicesResponse;
 
 const functions = require('firebase-functions');
 import {CloudFunction} from "firebase-functions";
+import {getTokens, sendNotification} from "./Utility";
 
 try {
     admin.initializeApp(functions.config().firebase);
@@ -16,56 +17,25 @@ const db = admin.database();
 export default class NotificationMessageClass {
 
     /**
-     * Va lire dans Firebase database la liste des ids utilisateur et va récupérer pour chacun d'eux son tokenDevice.
-     * Renverra une promesse avec un tableau contenant tous les tokens des utilisateurs
      *
-     * @param usersIds : Liste des ids des utilisateurs dont on veut les tokens
-     * @returns {Promise<string[]>} Promesse contenant le tableau des tokens
+     * @param tokens[] : string[] = tableau contenant les tokens des utilisateurs receveurs
+     * @param chatUid : string = Uid du chat d'origine
+     * @param annonceTitre :string = Titre de l'annonce
+     * @param message : string = Message à envoyer
+     * @param author : any = Objet contenant les informations de l'auteur
+     * @param receiverUid : string = Uid du receveur
      */
-    private static getTokens(usersIds): Promise<string[]> {
-        const promiseArray: Array<Promise<string>> = [];
-        for (const userId of usersIds) {
-            const promesse: Promise<string> = new Promise<string>((resolve, reject) => {
-                db.ref('/users/' + userId).once('value')
-                    .then(snapshotUser => {
-                        const user = snapshotUser.val();
-                        resolve(user.tokenDevice);
-                    })
-                    .catch(reason => {
-                        console.error(new Error(reason));
-                        reject(reason);
-                    });
-            });
-            promiseArray.push(promesse);
-        }
-        return Promise.all(promiseArray);
-    };
-
-    /**
-     *
-     * @param tokens
-     * @param chatUid
-     * @param annonceTitre
-     * @param message
-     * @param author
-     * @param receiverUid
-     */
-    private static sendNotification(tokens: string[], chatUid: string, annonceTitre: string, message: string, author: any, receiverUid: string[]): Promise<MessagingDevicesResponse> {
-        const payload = {
-            data: {
-                KEY_CHAT_RECEIVER: receiverUid[0],
-                KEY_CHAT_ORIGIN: 'true',
-                KEY_CHAT_UID: chatUid,
-                KEY_CHAT_AUTHOR: JSON.stringify(author)
-            },
-            notification: {
-                title: annonceTitre,
-                body: message,
-                tag: chatUid
-            }
+    private static sendResponseToChat(tokens: string[], chatUid: string, annonceTitre: string, message: string, author: any, receiverUid: string[]): Promise<MessagingDevicesResponse> {
+        const data = {
+            KEY_CHAT_RECEIVER: receiverUid[0],
+            KEY_CHAT_ORIGIN: 'true',
+            KEY_CHAT_UID: chatUid,
+            KEY_CHAT_AUTHOR: JSON.stringify(author)
         };
-        return admin.messaging().sendToDevice(tokens, payload);
+        return sendNotification(tokens, annonceTitre, message, chatUid, data);
     }
+
+
 
     /**
      *
@@ -99,11 +69,11 @@ export default class NotificationMessageClass {
                         console.log('Author informations : ' + JSON.stringify(snapshotAuthor));
 
                         // Récupération du token dans les paramètres des utilisateurs
-                        return NotificationMessageClass.getTokens(receiverId)
+                        return getTokens(receiverId)
                             .then(tokens => {
                                 if (tokens !== null && tokens.length > 0) {
                                     console.log('All tokens received : ' + tokens.toString());
-                                    return NotificationMessageClass.sendNotification(tokens, chatId, chatData.titreAnnonce, messageData.message, snapshotAuthor, receiverId)
+                                    return NotificationMessageClass.sendResponseToChat(tokens, chatId, chatData.titreAnnonce, messageData.message, snapshotAuthor, receiverId)
                                         .then(value => console.log('Messages correctement envoyés'))
                                         .catch(reason => console.error(reason));
                                 } else {

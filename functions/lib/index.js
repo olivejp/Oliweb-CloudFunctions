@@ -7,6 +7,7 @@ const DeleteOutdatedRequestsClass_1 = require("./DeleteOutdatedRequestsClass");
 const ReindexElasticsearchClass_1 = require("./ReindexElasticsearchClass");
 const NotificationMessageClass_1 = require("./NotificationMessageClass");
 const DeleteMessageWhenChatDeletedClass_1 = require("./DeleteMessageWhenChatDeletedClass");
+const CheckToNotifyUsersClass_1 = require("./CheckToNotifyUsersClass");
 const functions = require('firebase-functions');
 try {
     admin.initializeApp(functions.config().firebase);
@@ -24,12 +25,14 @@ exports.reindexElasticsearch = ReindexElasticsearchClass_1.default.reindexElasti
 // Observe /requests childs on Firebase Database.
 // Call ElasticSearch with the query parameters and write the result from ES to /requests/{requestId}/results in Firebase Database
 // Or set /requests/{requestId}/no_results = true if no result is return by Elasticsearch
-// This way the mobile application never talk to ES directly
+// This way the mobile application never talks to ES directly
 exports.observeRequest = ObserveOnRequestClass_1.default.observeOnRequestCloudFunction;
 // Cloud function qui sera appelée toutes les 5 minutes pour supprimer les requests qui ont plus de 1 minutes
 exports.deleteOutdatedRequests = DeleteOutdatedRequestsClass_1.default.deleteOutdatedRequestsCloudFunction;
 // Cloud function qui permet d'écouter tous les chats supprimés et de supprimer les messages correspondants
 exports.deleteMessageWhenChatDeleted = DeleteMessageWhenChatDeletedClass_1.default.deleteMessageWhenChatDeletedClassCloudFunction;
+// Cloud function pour envoyer des notifications aux utilisateurs selon plusieurs critères
+exports.checkAnnonceToNotify = CheckToNotifyUsersClass_1.default.checkAllAnnonceFunction;
 // Cloud function qui permet de créer des thumbnails de toutes les photos envoyées sur le storage
 // exports.createThumbnail = CreateThumbnailClass.createThumbnailFunction;
 //# sourceMappingURL=index.js.map
